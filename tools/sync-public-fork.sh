@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Sync this monorepo into a public fork working tree without private overlays.
+# Sync this monorepo into a public fork working tree without private overlays
+# (.cursor, local agent contract).
 #
 # Usage:
 #   ./tools/sync-public-fork.sh [SOURCE_DIR] [DEST_DIR]
 # Defaults: SOURCE = repo root, DEST = ~/Documents/GitHub/Remote-GTNH-Control
 #
-# Excludes: .git, build artifacts, server/.env, real oc-client/env.lua,
-#           private .cursor/rules/server.mdc (replaced from server.mdc.example).
+# Never copied to the public fork:
+#   .cursor/          Cursor rules (incl. private server.mdc)
+#   AGENTS.md         Agent contract for local IDE only
+#   server/.env, oc-client/env.lua
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,6 +23,8 @@ fi
 
 RSYNC_EXCLUDES=(
   --exclude='.git/'
+  --exclude='.cursor/'
+  --exclude='AGENTS.md'
   --exclude='node_modules/'
   --exclude='dist/'
   --exclude='.venv/'
@@ -31,19 +36,17 @@ RSYNC_EXCLUDES=(
   --exclude='*.egg-info/'
   --exclude='server/.env'
   --exclude='oc-client/env.lua'
-  --exclude='.cursor/rules/server.mdc'
 )
 
 rsync -a "${RSYNC_EXCLUDES[@]}" "$SRC/" "$DST/"
 
-if [[ -f "$SRC/.cursor/rules/server.mdc.example" ]]; then
-  mkdir -p "$DST/.cursor/rules"
-  cp "$SRC/.cursor/rules/server.mdc.example" "$DST/.cursor/rules/server.mdc"
-fi
-
 if [[ -f "$SRC/oc-client/env.lua.example" ]]; then
   cp "$SRC/oc-client/env.lua.example" "$DST/oc-client/env.lua"
 fi
+
+# Remove private paths if a previous sync left them behind.
+rm -rf "$DST/.cursor"
+[[ -f "$DST/AGENTS.md" ]] && rm -f "$DST/AGENTS.md"
 
 # Replace host-specific strings in the public tree only (local source unchanged).
 sanitize_public() {
@@ -62,5 +65,5 @@ while IFS= read -r -d '' f; do
   sanitize_public "$f"
 done < <(find "$DST" -type f \( -name '*.md' -o -name '*.conf' -o -name 'README*' \) -print0 2>/dev/null)
 
-echo "Synced $SRC -> $DST"
-echo "Note: review kb/ and tools/deploy for any host-specific lines before git push."
+echo "Synced $SRC -> $DST (no .cursor/, AGENTS.md)"
+echo "Note: review kb/ and tools/deploy for any host-specific lines before publishing."

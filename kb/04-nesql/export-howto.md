@@ -117,8 +117,8 @@ scp /tmp/nesql.tgz user@your-server:/tmp/
 
 ```bash
 ssh user@your-server
-mkdir -p /opt/gtnh-cyber/data/nesql
-cd /opt/gtnh-cyber/data/nesql
+mkdir -p /opt/remote-gtnh-control/data/nesql
+cd /opt/remote-gtnh-control/data/nesql
 tar xzf /tmp/nesql.tgz --strip-components=1
 ls
 # → подкаталоги с nesql-db.* или смешанный layout — положи путь к .script в --source-sql
@@ -133,7 +133,7 @@ ls
 Парсит `INSERT INTO …` из файла скрипта HSQLDB. Пример (подставь свой подкаталог):
 
 ```bash
-cd /opt/gtnh-cyber
+cd /opt/remote-gtnh-control
 docker compose exec backend python /app/../tools/nesql-import/import.py \
     --source-sql /app/data/nesql/export_may2026/nesql-db.script \
     --dst /app/data/nesql.sqlite \
@@ -143,7 +143,7 @@ docker compose exec backend python /app/../tools/nesql-import/import.py \
 С хоста:
 
 ```bash
-cd /opt/gtnh-cyber
+cd /opt/remote-gtnh-control
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r tools/nesql-import/requirements.txt    # необязательно для --source-sql
 python tools/nesql-import/import.py \

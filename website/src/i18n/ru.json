@@ -527,6 +527,19 @@
         "cpu": "Имя CPU (опционально)"
       }
     },
+    "plan": {
+      "title": "План (ME)",
+      "hint": "Планировщик на сервере: /api/craft/plan (алиас + NESQL).",
+      "goal_alias": "ID целевого alias",
+      "amount": "Количество",
+      "client": "Client ID OC",
+      "build": "Собрать план",
+      "refresh_tree": "Обновить",
+      "tree": "План / задачи",
+      "empty": "Создайте план, чтобы увидеть задачи",
+      "awaiting_choice_title": "Нужен выбор рецепта",
+      "awaiting_choice_body": "Есть задачи в состоянии awaiting_choice. Укажите рецепт через API (POST /api/craft/plan/{id}/choose) или клиентский сценарий, затем обновите дерево."
+    },
     "cpus": {
       "scan": "Сканировать CPU",
       "detail": "Включая детальную активность"

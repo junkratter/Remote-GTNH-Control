@@ -1,3 +1,3 @@
-"""gtnh-cyber backend package."""
+"""remote-gtnh-control backend package."""
 
 __version__ = "2.0.0"

@@ -30,6 +30,7 @@ from app.core.tasks import _to_dict, task_store
 from app.core.triggers import trigger_manager
 from app.db.session import get_session
 from app.modules.autocraft import service as autocraft_service
+from app.modules.craft.sync_report import sync_craft_job_after_report
 from app.schemas import (
     AddCommandModel,
     AddTaskByNameModel,
@@ -234,6 +235,7 @@ async def receive_chunked_report(
         final_results = _run_handle_and_callback(task_id, final_results)
         await task_store.update(session, task_id, status=COMPLETED, results=final_results)
         await autocraft_service.sync_craft_request_after_report(session, task_id, final_results)
+        await sync_craft_job_after_report(session, task_id, final_results, request.app)
         _maybe_save_history(task_id, final_results)
         return {
             "code": 200,
@@ -261,6 +263,7 @@ async def receive_report(
     final_results = _run_handle_and_callback(task_id, results)
     await task_store.update(session, task_id, status=COMPLETED, results=final_results)
     await autocraft_service.sync_craft_request_after_report(session, task_id, final_results)
+    await sync_craft_job_after_report(session, task_id, final_results, request.app)
     _maybe_save_history(task_id, final_results)
     return {"code": 200, "message": "Task result received", "data": {"taskId": task_id}}
 

@@ -26,4 +26,4 @@ EXPOSE 1030
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s \
     CMD curl -fsS http://127.0.0.1:1030/api/info/version || exit 1
 
-CMD ["python", "run.py", "--host", "0.0.0.0", "--port", "1030"]
+CMD ["sh", "-c", "exec gunicorn app.main:app -k uvicorn.workers.UvicornWorker -w ${BACKEND_WORKERS:-4} -b 0.0.0.0:1030 --access-logfile -"]

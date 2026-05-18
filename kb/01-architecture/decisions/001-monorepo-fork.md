@@ -1,4 +1,4 @@
-# ADR-001: Форк RemoteOC-GTNH-AE2 в монорепо `gtnh-cyber`
+# ADR-001: Форк RemoteOC-GTNH-AE2 в монорепо `remote-gtnh-control`
 
 - **Status:** Accepted
 - **Date:** 2026-05-16
@@ -12,24 +12,24 @@
   точкой входа для всех модулей (монолит проще, чем веер сервисов).
 - Внешний контракт `/api/task/*` ломать нельзя — на нём висит работающий
   OC-клиент в живом мире.
-- Нужна локальная **база знаний `kb/`** (выжимки вики), иначе искать
-  ответы только по огромному upstream-репозиторию неудобно.
+- Нужна локальная **база знаний для ИИ‑агента** (выжимки вики), иначе
+  Cursor захлёбывается в поиске.
 
 ## Decision
 
-1. Клонируем `z5882852/RemoteOC-GTNH-AE2` в `~/gtnh-cyber` как форк
-   (branch `main-fork`), upstream — git submodule в `kb/05-vendored/`.
+1. Клонируем [Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control) в `~/remote-gtnh-control`
+   (ветка `main` или рабочая ветка форка), upstream RemoteOC-GTNH-AE2 — git submodule в `kb/05-vendored/`.
 2. Монорепо: `server/`, `website/`, `oc-client/`, `tools/`, `kb/`,
    `docker-compose.yml`.
 3. Бэкенд расширяем модулями `server/app/modules/{robots,autocraft,map,
    quests,nesql}` поверх существующего `app/api/task.py`.
 4. База знаний `kb/` идёт в репо. Vendored submodules read‑only.
-5. На сервере — отдельный каталог деплоя (например `/opt/gtnh-cyber/`), старый стек
+5. На сервере — отдельный каталог деплоя (например `/opt/remote-gtnh-control/`), старый стек
    RemoteOC оставляем как fallback до миграции.
 
 ## Consequences
 
 - (+) Один контейнер бэка — простая модель деплоя и поллинга.
-- (+) Локальный `kb/` даёт короткие выжимки вместо полного дампа вики.
+- (+) Локальный `kb/` существенно сокращает токены для ИИ.
 - (−) Расхождение с upstream — сливать апдейты руками; помогают submodules.
 - (−) Монолит станет толстым; компенсируем модульной структурой `app/modules/`.

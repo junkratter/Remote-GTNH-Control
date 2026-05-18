@@ -18,7 +18,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, or_, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.constants import COMPLETED, PENDING, READY
@@ -145,15 +145,47 @@ class TaskStore:
     ) -> Task | None:
         """Find and mark as PENDING the next READY task for the given client."""
 
-        stmt = select(Task).where(Task.status == READY).order_by(Task.created_time)
-        rows = await session.execute(stmt)
-        for task in rows.scalars():
-            if not task.client_id or not client_id or task.client_id == client_id:
-                task.status = PENDING
-                task.pending_time = _now()
-                await session.commit()
-                return task
-        return None
+        bind = session.get_bind()
+        dialect = bind.dialect.name if bind is not None else "sqlite"
+
+        client_filter = (
+            or_(Task.client_id.is_(None), Task.client_id == client_id)
+            if client_id
+            else true()
+        )
+
+        if dialect == "sqlite":
+            stmt = (
+                select(Task)
+                .where(Task.status == READY)
+                .where(client_filter)
+                .order_by(Task.created_time)
+            )
+            rows = await session.execute(stmt)
+            for task in rows.scalars():
+                if not task.client_id or not client_id or task.client_id == client_id:
+                    task.status = PENDING
+                    task.pending_time = _now()
+                    await session.commit()
+                    return task
+            return None
+
+        stmt = (
+            select(Task)
+            .where(Task.status == READY)
+            .where(client_filter)
+            .order_by(Task.created_time)
+            .limit(1)
+            .with_for_update(skip_locked=True)
+        )
+        row = await session.execute(stmt)
+        task = row.scalar_one_or_none()
+        if task is None:
+            return None
+        task.status = PENDING
+        task.pending_time = _now()
+        await session.commit()
+        return task
 
     async def save_history(
         self,

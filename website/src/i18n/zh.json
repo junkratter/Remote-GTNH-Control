@@ -527,6 +527,19 @@
         "cpu": "CPU 名称 (可选)"
       }
     },
+    "plan": {
+      "title": "规划 (ME)",
+      "hint": "服务端 /api/craft/plan（别名 + NESQL 配方）。",
+      "goal_alias": "目标 alias ID",
+      "amount": "数量",
+      "client": "OC 客户端 ID",
+      "build": "生成规划",
+      "refresh_tree": "刷新",
+      "tree": "规划 / 任务",
+      "empty": "生成规划后可查看任务",
+      "awaiting_choice_title": "需要选择配方",
+      "awaiting_choice_body": "存在 awaiting_choice 状态的任务。请通过 API（POST /api/craft/plan/{id}/choose）选择解析后的配方，然后刷新树。"
+    },
     "cpus": {
       "scan": "扫描 CPU",
       "detail": "包含 CPU 详细信息"

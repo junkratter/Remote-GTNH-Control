@@ -9,13 +9,13 @@ GTNH Cyber needs remote control of **OpenComputers robots** for crop farming
 and GT miner deployment. OC only does **outgoing** HTTP; state is stored on
 the monolith backend (`robots`, `mining_jobs` tables). Knowledge base:
 `kb/02-opencomputers/component-robot.md`, `kb/03-gtnh/ic2-crops.md`,
-`kb/03-gtnh/gt-miner.md`, `kb/02-opencomputers/component-robot.md`.
+`kb/03-gtnh/gt-miner.md`.
 
 ## Decision
 
 1. **Lua plugins** `oc-client/plugins/robot_crop.lua` and
    `robot_miner.lua` live in `_G`, return `{ message, data }`, use `pcall`
-   and `os.sleep(0)` in loops (see `oc-client/README.md` and `kb/02-opencomputers/component-robot.md`).
+   and `os.sleep(0)` in loops per `AGENTS.md` / `.cursor/rules/oc-lua.mdc`.
 
 2. **Backend** exposes `/api/robots/*` for registry, state updates, and
    mining job CRUD. **Static routes** (`/mining-jobs`, `/mining-jobs/next`,

@@ -159,6 +159,35 @@ export const robotsApi = {
     },
 };
 
+async function craftEnvelope<T = unknown>(
+    path: string,
+    init?: RequestInit,
+): Promise<{ code?: number; message?: string; data?: T }> {
+    const base = apiBaseUrl();
+    const res = await fetch(`${base}${path}`, {
+        ...init,
+        headers: {
+            "Content-Type": "application/json",
+            "X-Server-Token": Setting.get("token") || "",
+            ...(init?.headers as Record<string, string>),
+        },
+    });
+    const json = (await res.json()) as { code?: number; message?: string; data?: T };
+    if (!res.ok || json.code !== 200) {
+        throw new Error(json.message || res.statusText);
+    }
+    return json;
+}
+
+export const craftApi = {
+    createPlan: (body: { goal_alias_id: number; amount: number; client_id?: string | null }) =>
+        craftEnvelope(`/api/craft/plan`, {
+            method: "POST",
+            body: JSON.stringify(body),
+        }),
+    getPlan: (rootJobId: number) => craftEnvelope(`/api/craft/plan/${rootJobId}`),
+};
+
 export const autocraftApi = {
     listPatterns: () => unwrap(api.GET("/api/autocraft/patterns", {})),
     upsertPattern: (body: {

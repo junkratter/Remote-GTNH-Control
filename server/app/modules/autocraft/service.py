@@ -93,10 +93,61 @@ async def enqueue_craft(session: AsyncSession, request: AutocraftRequest) -> str
         commands=[command],
         status=READY,
     )
+    await _mirror_autocraft_into_craft_domain(session, request, task_id)
     request.task_id = task_id
     request.state = "queued"
     await session.commit()
     return task_id
+
+
+async def _mirror_autocraft_into_craft_domain(
+    session: AsyncSession,
+    request: AutocraftRequest,
+    task_id: str,
+) -> None:
+    """Best-effort ``craft_plans`` / ``craft_jobs`` row mirroring the legacy queue."""
+
+    from app.core.logging import logger
+    from app.db.models import CraftJob, CraftPlan
+    from app.modules.craft.nesql_lookup import nesql_item_id_for_unlocal_name
+    from app.modules.craft.solver import ensure_singleton_alias, get_goal_alias_id_for_item
+
+    try:
+        hit = await nesql_item_id_for_unlocal_name(request.item_name, request.item_damage)
+        if hit is None:
+            return
+        nesql_id, dmg = hit
+        goal = await get_goal_alias_id_for_item(session, nesql_id, dmg)
+        alias_id = goal if goal is not None else await ensure_singleton_alias(session, nesql_id, dmg)
+
+        plan_row = CraftPlan(plan_json={}, status="open", client_id=request.client_id)
+        session.add(plan_row)
+        await session.flush()
+        job = CraftJob(
+            parent_id=None,
+            root_id=0,
+            plan_id=plan_row.id,
+            goal_alias_id=alias_id,
+            goal_amount=request.amount,
+            state="programmed",
+            task_id=task_id,
+            client_id=request.client_id,
+            chosen_nesql_recipe_id=None,
+        )
+        session.add(job)
+        await session.flush()
+        job.root_id = job.id
+        plan_row.root_job_id = job.id
+        plan_row.plan_json = {
+            "legacy_autocraft": True,
+            "root_job_id": job.id,
+            "plan_id": plan_row.id,
+            "goal_alias_id": alias_id,
+            "goal_amount": request.amount,
+        }
+        await session.flush()
+    except Exception as exc:
+        logger.warning("craft domain mirror for AutocraftRequest skipped: %s", exc)
 
 
 async def enqueue_cancel(session: AsyncSession, request: AutocraftRequest) -> str | None:

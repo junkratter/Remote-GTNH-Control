@@ -1,20 +1,16 @@
-# RemoteOC-GTNH-AE2 — справочник (выжимка)
+# remote-gtnh-control — справочник (выжимка)
 
 > Сводка для повторного использования: официальная документация, настройки **вашего** сервера, GTNH/OpenComputers, типичные ошибки и советы сообщества.  
 > Обновлено: 2026-05-15
 
-**Основные ссылки**
+**Полезные ссылки**
 
 | Ресурс | URL |
 |--------|-----|
-| Репозиторий (赛博监工 / GTNH Cyber Supervisor) | https://github.com/z5882852/RemoteOC-GTNH-AE2 |
-| Базовый фреймворк RemoteOC | https://github.com/z5882852/RemoteOC |
-| Releases (фронтенд) | https://github.com/z5882852/RemoteOC-GTNH-AE2/releases |
+| Репозиторий **remote-gtnh-control** | https://github.com/junkratter/Remote-GTNH-Control |
 | GTNH Wiki — OpenComputers | https://wiki.gtnewhorizons.com/wiki/Open_Computers |
 | OC — компонент Internet | https://ocdoc.cil.li/component:internet |
 | OC — Internet Card | https://ocdoc.cil.li/item:internet_card |
-| GTNH OpenComputers (форк) | https://github.com/GTNewHorizons/OpenComputers |
-| Альтернатива | https://github.com/5418ly/GTNH-OC-AE-Controller |
 
 ---
 
@@ -37,6 +33,14 @@
 - Несколько OC-клиентов (`clientId` в `env.lua`)
 - Тёмная тема, мобильная вёрстка
 
+### 1.1 Craft / NESQL слой (репозиторий remote-gtnh-control)
+
+Помимо legacy-очереди `POST /api/autocraft/request`, бэкенд ведёт **домен craft**: таблицы
+`craft_plans`, `craft_jobs`, резолв NESQL → `craft_recipes_*`, зеркалирование autocraft-запросов в план.
+Потокобезопасная выдача задач OC — `SKIP LOCKED` на PostgreSQL; hot-read NESQL — опциональный Redis L1
+(`nesql:*`, см. ADR-006). Браузер может подписаться на события плана через **`GET /api/events`**
+(см. `kb/01-architecture/api-contract.md`).
+
 **Требования по README:** хост с доступом извне (для веба); в игре — OC с интернет-картой и адаптером к ME.
 
 ---
@@ -46,7 +50,7 @@
 > Приватные IP, пути к миру и учётные данные храните **локально** (не в git).
 > См. `tools/deploy/`, `.env.example`, `oc-client/env.lua.example`.
 
-### 2.1. Docker Compose (gtnh-cyber)
+### 2.1. Docker Compose (remote-gtnh-control)
 
 ```bash
 cp .env.example .env   # SERVER_TOKEN=change_me
@@ -58,7 +62,7 @@ docker compose up -d --build
 | Backend | `8856` → `1030` |
 | Frontend | `8855` → `80` |
 
-Данные SQLite: Docker volume `gtnh_cyber_data` (см. `tools/deploy/backup-data.sh`).
+Данные SQLite: Docker volume `remote_gtnh_control_data` (см. `tools/deploy/backup-data.sh`).
 
 **Проверка API:**
 
@@ -98,29 +102,24 @@ filteringRules=[
 
 ---
 
-## 3. Официальная установка (GitHub README)
+## 3. Установка OC-клиента (remote-gtnh-control)
 
-Источник: [README RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2)
+Исходники Lua-клиента: каталог **`oc-client/`** в репозитории  
+[github.com/junkratter/Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control).  
+Пошагово (структура файлов, `wget`): [`kb/02-opencomputers/oc-client-install.md`](../02-opencomputers/oc-client-install.md).
 
 ### 3.1. Docker (рекомендуется)
 
 1. Установить Docker + Docker Compose
-2. Скачать `docker-compose.yml` и `server/.env`
-3. Настроить `.env` (`SERVER_TOKEN`, при необходимости порты)
-4. `docker compose up -d`
-5. По умолчанию в upstream: фронт **80**, бэкенд **8080** — у вас переопределено на **8855/8856**
+2. См. корневой `README.md` и `.env.example`
+3. `docker compose up -d --build`
+4. Порты по умолчанию на хосте: фронт **8855**, бэкенд **8856** (см. `docker-compose.yml`)
 
 ### 3.2. Backend без Docker
 
-```bash
-git clone https://github.com/z5882852/RemoteOC-GTNH-AE2.git
-cd RemoteOC-GTNH-AE2/server
-pip install -r requirements.txt
-# правка .env и config.py
-python run.py --port 8080
-```
+См. корневой `README.md` (локальная разработка, `make backend`).
 
-### 3.3. OC-клиент в игре
+### 3.3. Файлы на диске OC
 
 **Железо (минимум):**
 
@@ -132,15 +131,15 @@ python run.py --port 8080
 | Блок | Adapter вплотную к ME Controller или ME Interface |
 | Анализатор | Снять UUID ME-блока для `env.lua` |
 
-**Установка файлов:**
+**Установка файлов** (ветка `main`, каталог `oc-client/`):
 
 ```bash
-# в OpenOS на компьютере:
-wget https://raw.githubusercontent.com/z5882852/RemoteOC-GTNH-AE2/main/client/setup.lua
-setup.lua
+# пример: скачать run.lua с GitHub raw
+wget https://raw.githubusercontent.com/junkratter/Remote-GTNH-Control/main/oc-client/run.lua run.lua
+# остальные файлы — список в oc-client-install.md
 ```
 
-Если GitHub недоступен — скопировать папку `client/` целиком на диск OC (`/home/...`).
+Без доступа к сети — скопируйте каталог `oc-client/` с ПК на диск OC.
 
 **`env.lua` (обязательные поля):**
 
@@ -286,12 +285,7 @@ print(ae and ae.getAllSilempleItems() or "plugin ae not loaded")
 
 У OC нет реального времени без GPS/World Sensor — на логику RemoteOC не влияет.
 
-### 6.5. Альтернативы
-
-- [GTNH-OC-AE-Controller](https://github.com/5418ly/GTNH-OC-AE-Controller) — другой стек (Flask/Java), похожая идея.
-- [z5882852/GTNH-OC-AE-Controller](https://github.com/z5882852/GTNH-OC-AE-Controller) — вариант от того же автора.
-
-### 6.6. Reddit / FTF (общие темы, применимые к GTNH+AE)
+### 6.5. Reddit / FTF (общие темы, применимые к GTNH+AE)
 
 - Удалённый мониторинг AE исторически обсуждали через ComputerCraft/OpenPeripheral; для GTNH актуален именно **OpenComputers + adapter**.
 - r/feedthebeast, r/GTNH: ищите `"OpenComputers"`, `"internet card"`, `"AE2 automation"` — чаще про Lua-скрипты и `filteringRules`, чем про RemoteOC по имени.
@@ -319,7 +313,7 @@ print(ae and ae.getAllSilempleItems() or "plugin ae not loaded")
 
 ```bash
 # --- Docker RemoteOC ---
-cd /opt/gtnh-cyber && docker compose ps
+cd /opt/remote-gtnh-control && docker compose ps
 docker compose restart && docker compose logs -f roc-gtnh-backend
 
 # --- Minecraft creative ---

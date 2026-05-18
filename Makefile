@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 
 help:
-	@echo "GTNH Cyber — Make targets"
+	@echo "Remote GTNH Control — Make targets"
 	@echo "  install       — backend venv + npm install"
 	@echo "  dev           — docker compose up -d"
 	@echo "  test          — pytest in server/"

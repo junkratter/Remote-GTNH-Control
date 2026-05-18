@@ -1,14 +1,39 @@
 volumes:
-  gtnh_cyber_data:
-    name: gtnh_cyber_data
+  remote_gtnh_control_data:
+    name: remote_gtnh_control_data
+  remote_gtnh_control_pg:
+    name: remote_gtnh_control_pg
 
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: remote-gtnh-control-redis
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16-alpine
+    container_name: remote-gtnh-control-postgres
+    environment:
+      POSTGRES_DB: remote_gtnh_control
+      POSTGRES_USER: gtnh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gtnh_dev_password_change_me}
+    volumes:
+      - remote_gtnh_control_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "gtnh"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   backend:
     build:
       context: ./server
       dockerfile: Dockerfile
-    image: gtnh-cyber/backend:latest
-    container_name: gtnh-cyber-backend
+    image: remote-gtnh-control/backend:latest
+    container_name: remote-gtnh-control-backend
     env_file:
       - .env
     environment:
@@ -16,15 +41,18 @@ services:
       ACCESS_LOG_HTTP: ${ACCESS_LOG_HTTP:-false}
       BACKEND_HOST: 0.0.0.0
       BACKEND_PORT: 1030
-      DATABASE_URL: sqlite+aiosqlite:////app/data/gtnh-cyber.sqlite
-      SYNC_DATABASE_URL: sqlite:////app/data/gtnh-cyber.sqlite
+      BACKEND_WORKERS: ${BACKEND_WORKERS:-4}
+      DATABASE_URL: sqlite+aiosqlite:////app/data/remote-gtnh-control.sqlite
+      SYNC_DATABASE_URL: sqlite:////app/data/remote-gtnh-control.sqlite
       NESQL_DATABASE_URL: sqlite:////app/data/nesql.sqlite
+      OPTIONAL_REDIS_URL: ${OPTIONAL_REDIS_URL:-redis://redis:6379/0}
     ports:
       - "${BACKEND_PORT_HOST:-8856}:1030"
     volumes:
-      # Named volume: DBs survive image rebuilds. Host mirror: ./data/backend (see tools/deploy/backup-data.sh).
-      - gtnh_cyber_data:/app/data
+      - remote_gtnh_control_data:/app/data
     restart: unless-stopped
+    depends_on:
+      - redis
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:1030/api/info/version"]
       interval: 30s
@@ -36,8 +64,8 @@ services:
     build:
       context: ./website
       dockerfile: Dockerfile
-    image: gtnh-cyber/frontend:latest
-    container_name: gtnh-cyber-frontend
+    image: remote-gtnh-control/frontend:latest
+    container_name: remote-gtnh-control-frontend
     ports:
       - "${FRONTEND_PORT_HOST:-8855}:80"
     restart: unless-stopped

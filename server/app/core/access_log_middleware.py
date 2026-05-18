@@ -10,7 +10,7 @@ from starlette.responses import Response
 
 from app.core.settings import settings
 
-_access_logger = logging.getLogger("gtnh-cyber.access")
+_access_logger = logging.getLogger("remote-gtnh-control.access")
 
 
 class HttpAccessLogMiddleware(BaseHTTPMiddleware):

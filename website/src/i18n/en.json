@@ -537,6 +537,19 @@
         "cpu": "CPU name (optional)"
       }
     },
+    "plan": {
+      "title": "Plan (ME-style)",
+      "hint": "Server-side planner via /api/craft/plan (alias + resolved NESQL recipes).",
+      "goal_alias": "Goal alias id",
+      "amount": "Amount",
+      "client": "OC client id",
+      "build": "Build plan",
+      "refresh_tree": "Refresh tree",
+      "tree": "Plan / jobs",
+      "empty": "Create a plan to see job rows",
+      "awaiting_choice_title": "Recipe choice required",
+      "awaiting_choice_body": "At least one job is in “awaiting choice” state. Pick a resolved recipe via the API (POST /api/craft/plan/{id}/choose) or your client workflow, then refresh the tree."
+    },
     "cpus": {
       "scan": "Scan CPUs",
       "detail": "Include detailed CPU activity"

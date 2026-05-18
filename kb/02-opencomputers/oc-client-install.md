@@ -1,7 +1,7 @@
 # OpenComputers client — installation
 
-> **Source:** `gtnh-cyber/oc-client/`  
-> **Last updated:** 2026-05-16  
+> **Source repository:** [Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control) — directory `oc-client/`  
+> **Last updated:** 2026-05-18  
 
 ## RU — куда класть файлы
 
@@ -42,8 +42,8 @@ Copy files verbatim from `oc-client/` in the monorepo.
 **wget (when Internet Card works):** from in-game shell, after `mkdir`:
 
 ```lua
--- replace BASE with raw URL prefix of your published oc-client/ tree, e.g.:
--- https://raw.githubusercontent.com/<you>/<fork>/main/oc-client/
+-- Canonical BASE (default branch main):
+-- https://raw.githubusercontent.com/junkratter/Remote-GTNH-Control/main/oc-client/
 ```
 
 ```text

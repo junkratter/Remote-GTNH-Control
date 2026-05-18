@@ -6,7 +6,7 @@ if #args >= 1 then
     repo = args[1]
 else
     -- Default matches upstream RemoteOC layout (directory "client/").
-    -- gtnh-cyber uses "oc-client/" — pass your raw prefix, see kb/02-opencomputers/oc-client-install.md
+    -- remote-gtnh-control uses "oc-client/" — pass your raw prefix, see kb/02-opencomputers/oc-client-install.md
     repo = "https://raw.githubusercontent.com/z5882852/RemoteOC-GTNH-AE2/main/client/"
 end
 

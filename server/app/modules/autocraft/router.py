@@ -125,7 +125,12 @@ async def program_pattern(
 # --- craft requests ---------------------------------------------------------
 
 
-@router.post("/request", response_model=StandardResponseModel)
+@router.post(
+    "/request",
+    response_model=StandardResponseModel,
+    deprecated=True,
+    description="Legacy queue; prefer /api/craft/plan (ADR-007).",
+)
 async def request_craft(payload: CraftRequest, session: AsyncSession = Depends(get_session)) -> dict:
     req = AutocraftRequest(
         client_id=payload.client_id,
@@ -181,7 +186,12 @@ async def cancel_request(request_id: int, session: AsyncSession = Depends(get_se
 # --- CPU monitoring ---------------------------------------------------------
 
 
-@router.post("/cpus/scan", response_model=StandardResponseModel)
+@router.post(
+    "/cpus/scan",
+    response_model=StandardResponseModel,
+    deprecated=True,
+    description="Legacy CPU scan task; prefer monitoring APIs / future consolidation.",
+)
 async def scan_cpus(
     client_id: str = Body(..., embed=True),
     detail: bool = Body(False, embed=True),

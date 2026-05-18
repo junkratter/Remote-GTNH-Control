@@ -31,11 +31,11 @@ class Settings(BaseSettings):
     access_log_http: bool = Field(False, alias="ACCESS_LOG_HTTP")
 
     database_url: str = Field(
-        f"sqlite+aiosqlite:///{DATA_DIR / 'gtnh-cyber.sqlite'}",
+        f"sqlite+aiosqlite:///{DATA_DIR / 'remote-gtnh-control.sqlite'}",
         alias="DATABASE_URL",
     )
     sync_database_url: str = Field(
-        f"sqlite:///{DATA_DIR / 'gtnh-cyber.sqlite'}",
+        f"sqlite:///{DATA_DIR / 'remote-gtnh-control.sqlite'}",
         alias="SYNC_DATABASE_URL",
     )
     nesql_database_url: str = Field(
@@ -45,6 +45,8 @@ class Settings(BaseSettings):
 
     data_dir: Path = Field(default=DATA_DIR, alias="DATA_DIR")
     legacy_tasks_dir: Path = Field(default=PROJECT_ROOT / "tasks", alias="LEGACY_TASKS_DIR")
+
+    optional_redis_url: str | None = Field(default=None, alias="OPTIONAL_REDIS_URL")
 
 
 settings = Settings()

@@ -113,6 +113,37 @@
                     </el-table-column>
                 </el-table>
             </el-tab-pane>
+
+            <!-- Plan (server-side ME planner) -->
+            <el-tab-pane name="plan" :label="t('autocraft.plan.title')">
+                <p class="page-autocraft__wiki-hint">{{ t('autocraft.plan.hint') }}</p>
+                <div class="page-autocraft__row">
+                    <el-form label-position="top" :model="craftPlan.form" class="page-autocraft__col">
+                        <el-form-item :label="t('autocraft.plan.goal_alias')">
+                            <el-input-number v-model="craftPlan.form.goal_alias_id" :min="1" />
+                        </el-form-item>
+                        <el-form-item :label="t('autocraft.plan.amount')">
+                            <el-input-number v-model="craftPlan.form.amount" :min="1" />
+                        </el-form-item>
+                        <el-form-item :label="t('autocraft.plan.client')">
+                            <el-input v-model="craftPlan.form.client_id" clearable />
+                        </el-form-item>
+                    </el-form>
+                </div>
+                <div class="page-autocraft__wiki-toolbar">
+                    <el-button type="primary" :loading="craftPlan.loading" @click="submitCraftPlan">
+                        {{ t('autocraft.plan.build') }}
+                    </el-button>
+                    <el-button :disabled="!craftPlan.root_job_id" @click="refreshCraftTree">
+                        {{ t('autocraft.plan.refresh_tree') }}
+                    </el-button>
+                </div>
+                <div v-if="craftPlan.treeText" class="page-autocraft__tree-wrap">
+                    <div class="page-autocraft__tree-label">{{ t('autocraft.plan.tree') }}</div>
+                    <pre class="page-autocraft__tree">{{ craftPlan.treeText }}</pre>
+                </div>
+                <el-empty v-else :description="t('autocraft.plan.empty')" />
+            </el-tab-pane>
         </el-tabs>
 
         <!-- Pattern editor -->
@@ -280,12 +311,14 @@
 </template>
 
 <script setup>
-import { computed, inject, onMounted, reactive, ref } from 'vue';
+import { computed, inject, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Refresh, Plus, Cpu } from '@element-plus/icons-vue';
-import { autocraftApi, nesqlApi } from '@/api';
+import { autocraftApi, craftApi, nesqlApi } from '@/api';
 import itemUtil from '@/utils/items';
+import Setting from '@/utils/setting';
+import { openEventsStream } from '@/utils/events';
 
 import ItemList from '@/components/ItemList.vue';
 
@@ -296,6 +329,9 @@ const tab = ref('patterns');
 const patterns = ref([]);
 const requests = ref([]);
 const loading = reactive({ patterns: false, requests: false });
+
+/** Suppress repeated “awaiting choice” dialogs until the tree is clean or a new plan is built. */
+const awaitingChoiceAlertShown = ref(false);
 
 const dialogWidth = computed(() => (isMobile.value ? '92%' : '520px'));
 
@@ -489,6 +525,110 @@ async function applyWikiRecipe(row) {
     }
 }
 
+const craftPlan = reactive({
+    loading: false,
+    root_job_id: null,
+    treeText: '',
+    form: { goal_alias_id: 1, amount: 1, client_id: '' },
+});
+
+async function submitCraftPlan() {
+    craftPlan.loading = true;
+    try {
+        const r = await craftApi.createPlan({
+            goal_alias_id: craftPlan.form.goal_alias_id,
+            amount: craftPlan.form.amount,
+            client_id: craftPlan.form.client_id || null,
+        });
+        const d = r.data;
+        craftPlan.root_job_id = d?.root_job_id ?? null;
+        awaitingChoiceAlertShown.value = false;
+        await refreshCraftTree();
+        ElMessage.success(t('common.success'));
+    } catch (err) {
+        ElMessage.error(String(err));
+    } finally {
+        craftPlan.loading = false;
+    }
+}
+
+async function refreshCraftTree() {
+    if (!craftPlan.root_job_id) return;
+    try {
+        const r = await craftApi.getPlan(craftPlan.root_job_id);
+        craftPlan.treeText = JSON.stringify(r.data, null, 2);
+        maybeAlertAwaitingChoice(craftPlan.treeText);
+    } catch (err) {
+        ElMessage.error(String(err));
+    }
+}
+
+let planEventsHandle = null;
+
+function stopPlanEvents() {
+    if (planEventsHandle) {
+        planEventsHandle.close();
+        planEventsHandle = null;
+    }
+}
+
+function apiBaseForEvents() {
+    return Setting.get('backendUrl') || import.meta.env.VITE_API_BASE || '';
+}
+
+function eventConcernsCurrentPlan(payload, rootId) {
+    if (!rootId || !payload || typeof payload !== 'object') return false;
+    return payload.root_job_id === rootId || payload.root_id === rootId;
+}
+
+function onPlanSseMessage(ev) {
+    let outer;
+    try {
+        outer = JSON.parse(ev.data);
+    } catch {
+        return;
+    }
+    if (outer.topic !== 'craft') return;
+    const rid = craftPlan.root_job_id;
+    if (!eventConcernsCurrentPlan(outer.payload || {}, rid)) {
+        return;
+    }
+    refreshCraftTree();
+}
+
+function syncPlanEventsSubscription() {
+    stopPlanEvents();
+    if (tab.value !== 'plan') return;
+    const token = Setting.get('token');
+    if (!token) return;
+    planEventsHandle = openEventsStream(apiBaseForEvents(), token, onPlanSseMessage, {
+        topics: ['craft'],
+    });
+}
+
+function maybeAlertAwaitingChoice(treeJson) {
+    let obj;
+    try {
+        obj = JSON.parse(treeJson);
+    } catch {
+        return;
+    }
+    const jobs = obj.jobs || [];
+    const pending = jobs.some((j) => j.state === 'awaiting_choice');
+    if (pending) {
+        if (!awaitingChoiceAlertShown.value) {
+            awaitingChoiceAlertShown.value = true;
+            ElMessageBox.alert(
+                t('autocraft.plan.awaiting_choice_body'),
+                t('autocraft.plan.awaiting_choice_title'),
+                { type: 'warning' },
+            );
+        }
+    } else {
+        awaitingChoiceAlertShown.value = false;
+    }
+}
+
 async function loadAll() {
     await Promise.all([loadPatterns(), loadRequests()]);
 }
@@ -614,7 +754,14 @@ async function submitCpuScan() {
     } catch (err) { ElMessage.error(String(err)); }
 }
 
-onMounted(loadAll);
+onMounted(() => {
+    loadAll();
+    syncPlanEventsSubscription();
+});
+onUnmounted(stopPlanEvents);
+watch(tab, () => {
+    syncPlanEventsSubscription();
+});
 </script>
 
 <style scoped>
@@ -643,5 +790,15 @@ onMounted(loadAll);
     margin-bottom: 8px;
     flex-wrap: wrap;
 }
-.page-autocraft__wiki-for { font-size: 13px; opacity: 0.85; }
+.page-autocraft__tree-wrap { margin-top: 12px; }
+.page-autocraft__tree-label { font-size: 13px; margin-bottom: 6px; opacity: 0.85; }
+.page-autocraft__tree {
+    margin: 0;
+    font-size: 12px;
+    overflow: auto;
+    max-height: 420px;
+    padding: 10px;
+    border-radius: 6px;
+    background: var(--el-fill-color-light);
+}
 </style>

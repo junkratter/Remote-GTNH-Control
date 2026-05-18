@@ -1,10 +1,12 @@
-# gtnh-cyber
+# remote-gtnh-control
 
-**GTNH Cyber Supervisor** — remote monitoring and control for **Applied Energistics 2** in **GregTech: New Horizons** via **OpenComputers** and a web UI.
+**Remote GTNH Control** — remote monitoring and control for **Applied Energistics 2** in **GregTech: New Horizons** via **OpenComputers** and a web UI.
 
 **English** · [Русский](README.ru.md)
 
-Fork and extension of [RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2) (upstream [RemoteOC](https://github.com/z5882852/RemoteOC)). You need a host reachable from the game network (LAN or public) for the API/UI, and one or more OC computers as clients.
+**Source repository:** [https://github.com/junkratter/Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control)
+
+You need a host reachable from the game network (LAN or public) for the API/UI, and one or more OC computers as clients.
 
 ---
 
@@ -33,7 +35,7 @@ OpenComputers can only make **outgoing** HTTP requests → the backend is a **si
 | **Multi-client** | Several OC `clientId` values on one backend |
 | **UI** | Dark theme, mobile layout, configurable backend URL and token |
 
-### Added in gtnh-cyber
+### Added in remote-gtnh-control
 
 | Area | Description |
 |------|-------------|
@@ -43,7 +45,7 @@ OpenComputers can only make **outgoing** HTTP requests → the backend is a **si
 | **Quests** | Better Questing board from NESQL — `/api/quests/*` |
 | **Wiki** | Read-only item/recipe browser — `/api/nesql/*` |
 | **i18n** | Web UI: **en / ru / zh** (vue-i18n + Element Plus) |
-| **Persistence** | Docker volume `gtnh_cyber_data` for SQLite; deploy/backup scripts |
+| **Persistence** | Docker volume `remote_gtnh_control_data` for SQLite; deploy/backup scripts |
 | **Tests** | pytest integration + `/api/task/*` contract tests |
 
 ---
@@ -51,7 +53,7 @@ OpenComputers can only make **outgoing** HTTP requests → the backend is a **si
 ## Repository layout
 
 ```text
-gtnh-cyber/
+remote-gtnh-control/
 ├── server/              FastAPI, SQLAlchemy 2, Alembic, SQLite
 ├── website/             Vue 3, Element Plus, Vite, vue-i18n
 ├── oc-client/           Lua client + plugins (see oc-client/README.md)
@@ -61,7 +63,8 @@ gtnh-cyber/
 │   └── deploy/          Docker bootstrap, backup, robot seed
 ├── kb/                  Knowledge base, ADR, OC/GTNH guides
 ├── docker-compose.yml
-└── Makefile
+├── Makefile
+└── AGENTS.md            Rules for contributors and AI agents
 ```
 
 ---
@@ -74,15 +77,15 @@ gtnh-cyber/
 | Frontend | Node **18+**, npm |
 | Docker (optional) | Docker Compose v2 |
 | OC client (in-game) | OpenComputers **1.11.x** (GTNH), Internet Card, ME adapter |
-| NESQL (optional) | Java JDK for `tools/nesql-import`, [nesql-exporter](https://github.com/GTNewHorizons/nesql-exporter) mod in the client |
+| NESQL (optional) | Java JDK for `tools/nesql-import`, GTNH **nesql-exporter** mod in the client (see `kb/04-nesql/export-howto.md`) |
 
 ---
 
 ## Quick start (Docker)
 
 ```bash
-git clone <your-fork-url> gtnh-cyber
-cd gtnh-cyber
+git clone https://github.com/junkratter/Remote-GTNH-Control.git remote-gtnh-control
+cd remote-gtnh-control
 git submodule update --init --recursive   # optional: kb/05-vendored
 
 cp .env.example .env
@@ -101,7 +104,7 @@ docker compose up -d --build
 
 Override ports in `.env`: `FRONTEND_PORT_HOST`, `BACKEND_PORT_HOST`.
 
-**Persistent data:** SQLite files live in Docker volume **`gtnh_cyber_data`** (survives image rebuilds). Mirror to the host for backups:
+**Persistent data:** SQLite files live in Docker volume **`remote_gtnh_control_data`** (default DB file `remote-gtnh-control.sqlite` inside the volume). Survives image rebuilds. Mirror to the host for backups:
 
 ```bash
 chmod +x tools/deploy/*.sh
@@ -176,13 +179,21 @@ make kb-update               # refresh kb/ wiki slices (tools/kb-fetch)
 
 ## OpenComputers client
 
+**Lua client source (this project):** [github.com/junkratter/Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control) — directory **`oc-client/`** in the repo root. Copy that tree to the OpenComputers computer disk (or use `wget` against the raw files on the `main` branch — see below).
+
 ### Install
 
 | Method | Doc |
 |--------|-----|
-| Copy `oc-client/` to OC disk | [`kb/02-opencomputers/oc-client-install.md`](kb/02-opencomputers/oc-client-install.md) |
+| Copy `oc-client/` to OC disk | [`kb/02-opencomputers/oc-client-install.md`](kb/02-opencomputers/oc-client-install.md) (includes **raw GitHub URL** for `wget`) |
 | Crop / miner / power robots | [`kb/02-opencomputers/robots-setup.ru.md`](kb/02-opencomputers/robots-setup.ru.md) (RU, detailed) |
 | Power generators (GT) | [`kb/03-gtnh/gt-power-deploy.md`](kb/03-gtnh/gt-power-deploy.md) |
+
+**One-line base URL for in-game `wget`** (replace branch if you use another):
+
+```text
+https://raw.githubusercontent.com/junkratter/Remote-GTNH-Control/main/oc-client/
+```
 
 ### Run
 
@@ -239,7 +250,7 @@ Named AE tasks default to `client_id: client_01` in [`server/app/automation/conf
 
 ### 1. Export in Minecraft (client)
 
-Official mod: **[GTNewHorizons/nesql-exporter](https://github.com/GTNewHorizons/nesql-exporter)**.
+Use the GTNH **nesql-exporter** mod (build from sources linked in `kb/04-nesql/export-howto.md`).
 
 - Build **`NESQL-Exporter-<version>.jar`** + **`-deps.jar`** (`./gradlew build` → `build/libs/`, version in `gradle.properties`, e.g. **0.5.2**).
 - Install **only that pair** into the instance **`mods/`** (client; not dedicated server `mods/`).
@@ -274,6 +285,7 @@ Without import, Wiki/quests/recipe search return empty or 404.
 
 | Document | Description |
 |----------|-------------|
+| [`AGENTS.md`](AGENTS.md) | Stack, boundaries, agent rules |
 | [`kb/01-architecture/overview.md`](kb/01-architecture/overview.md) | Deployment template, troubleshooting |
 | [`kb/01-architecture/api-contract.md`](kb/01-architecture/api-contract.md) | `/api/task/*` contract |
 | [`kb/01-architecture/oc-polling.md`](kb/01-architecture/oc-polling.md) | Long-poll flow |
@@ -308,32 +320,20 @@ Without import, Wiki/quests/recipe search return empty or 404.
 
 | Document | Description |
 |----------|-------------|
-| [`kb/README.md`](kb/README.md) | How to use the knowledge base |
+| [`kb/README.md`](kb/README.md) | Knowledge base index |
 | [`kb/07-glossary.md`](kb/07-glossary.md) | GTNH/OC terms |
-| [`kb/01-architecture/github-first-deploy.md`](kb/01-architecture/github-first-deploy.md) | First push to GitHub (RU) |
 | [`oc-client/README.md`](oc-client/README.md) | Lua client quick reference |
 
 `kb/05-vendored/` — git submodules (upstream RemoteOC, nesql-exporter, OpenComputers-GTNH). **Read-only** reference; do not edit.
 
----
-
-## Publishing to GitHub
-
-First-time setup (install Git, connect empty GitHub repo, push): **[`kb/01-architecture/github-first-deploy.md`](kb/01-architecture/github-first-deploy.md)** (Russian; steps are universal).
-
-Before the first public push:
+### Security note for contributors
 
 1. `cp oc-client/env.lua.example oc-client/env.lua` locally — do not commit `env.lua`.
 2. `cp .env.example .env` — do not commit `.env` / `server/.env`.
-3. `git rm --cached server/.env oc-client/env.lua` if they were ever tracked.
-4. **Rotate `SERVER_TOKEN`** if it appeared in git history.
-5. Keep private runbooks (IPs, SSH, world paths) out of the repo.
-6. Do not commit `data/`, `*.sqlite`, or secrets inside submodules.
+3. Do not commit `data/`, `*.sqlite`, or secrets.
 
 ---
 
 ## License
 
-**MIT** — see [`LICENSE`](LICENSE) (Copyright (c) 2024 z5882852).
-
-Upstream [RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2) is MIT. Third-party submodules under `kb/05-vendored/` have their own licenses (`LICENSE*`, `LICENSE.md` in each tree).
+**MIT** — see [`LICENSE`](LICENSE). Lineage includes RemoteOC-GTNH-AE2 / RemoteOC (MIT). Third-party submodules under `kb/05-vendored/` have their own licenses (`LICENSE*`, `LICENSE.md` in each tree).

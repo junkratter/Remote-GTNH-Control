@@ -111,5 +111,34 @@ X-Client-ID: client_01
 
 ## Расширение
 
-Новые модули (`/api/robots/*`, `/api/autocraft/*`, `/api/map/*`, `/api/quests/*`,
-`/api/nesql/*`) добавляются **рядом**, без правки `/api/task/*`.
+Новые модули (`/api/robots/*`, `/api/autocraft/*`, `/api/craft/*`, `/api/map/*`, `/api/quests/*`,
+`/api/nesql/*`, `/api/events`) добавляются **рядом**, без правки `/api/task/*`.
+
+### Craft planner (`/api/craft/*`)
+
+Тот же envelope `{ code, message, data }`, заголовок `X-Server-Token`.
+
+| Метод | Путь | Назначение |
+|-------|------|------------|
+| `POST` | `/api/craft/plan` | Собрать план по `goal_alias_id` + `amount`. |
+| `GET` | `/api/craft/plan/{root_job_id}` | Дерево задач плана. |
+| `POST` | `/api/craft/plan/{root_job_id}/choose` | Выбор альтернативы (`recipe_id` = `craft_recipes_resolved.id`). |
+| `POST` | `/api/craft/plan/{root_job_id}/start` | Постановка OC-задачи (`ae.requestItem` через task store). |
+| `POST` | `/api/craft/plan/{root_job_id}/cancel` | Отмена поддерева. |
+| `GET` | `/api/craft/aliases` | Список алиасов. |
+| `POST` | `/api/craft/aliases` | Ручной алиас (`source=manual`). |
+
+### SSE `/api/events` (не task-договор)
+
+Поток `text/event-stream` для браузера. EventSource **не шлёт** кастомные заголовки, поэтому
+токен передаётся query-параметром **`?token=<SERVER_TOKEN>`** (тот же секрет, что и `X-Server-Token`).
+
+| Query | Смысл |
+|-------|--------|
+| `token` | Обязателен; иначе ответ с обёрткой `{ code: 403, ... }` (HTTP 200 по правилам приложения). |
+| `topics` | Необязательный список через запятую — фильтр JSON-поля `topic` внутри события (`craft`, …). Пусто = все топики. |
+
+События — строки `data: {"topic":"craft","payload":{...}}\n\n`. Пинг комментариями SSE `: ping` каждые ~15 с.
+Источник: Redis pub/sub канала `gtnh:events`, если задан `OPTIONAL_REDIS_URL`; иначе на Postgres —
+`LISTEN` на `pg_notify('remote_gtnh_control_events', …)`; на чистом SQLite без Redis — только пинги (локальные
+уведомления недоступны без Redis/PG).

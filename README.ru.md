@@ -1,10 +1,11 @@
-# gtnh-cyber
+# remote-gtnh-control
 
-**GTNH Cyber Supervisor** (赛博监工) — удалённый мониторинг и управление **Applied Energistics 2** в **GregTech: New Horizons** через **OpenComputers** и веб-интерфейс.
+**Remote GTNH Control** — удалённый мониторинг и управление **Applied Energistics 2** в **GregTech: New Horizons** через **OpenComputers** и веб-интерфейс.
 
 [English](README.md) · **Русский**
 
-Форк и развитие [RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2) (базовый фреймворк [RemoteOC](https://github.com/z5882852/RemoteOC)). Нужен хост, доступный из сети, где крутится Minecraft (LAN или интернет), и один или несколько компьютеров OC в игре.
+**Репозиторий:** [https://github.com/junkratter/Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control).  
+Нужен хост, доступный из сети, где крутится Minecraft (LAN или интернет), и один или несколько компьютеров OC в игре.
 
 ---
 
@@ -33,7 +34,7 @@ OpenComputers умеет только **исходящий** HTTP → бэкен
 | **Несколько клиентов** | Разные `clientId` на одном бэкенде |
 | **Интерфейс** | Тёмная тема, мобильная вёрстка, настройки URL и токена |
 
-### Добавлено в gtnh-cyber
+### Добавлено в remote-gtnh-control
 
 | Модуль | Описание |
 |--------|----------|
@@ -43,7 +44,7 @@ OpenComputers умеет только **исходящий** HTTP → бэкен
 | **Квесты** | Доска Better Questing из NESQL — `/api/quests/*` |
 | **Wiki** | Просмотр предметов и рецептов — `/api/nesql/*` |
 | **i18n** | Интерфейс: **en / ru / zh** (vue-i18n + Element Plus) |
-| **Хранение данных** | Docker volume `gtnh_cyber_data`; скрипты бэкапа и деплоя |
+| **Хранение данных** | Docker volume `remote_gtnh_control_data`; скрипты бэкапа и деплоя |
 | **Тесты** | pytest + контрактные тесты `/api/task/*` |
 
 ---
@@ -51,7 +52,7 @@ OpenComputers умеет только **исходящий** HTTP → бэкен
 ## Структура репозитория
 
 ```text
-gtnh-cyber/
+remote-gtnh-control/
 ├── server/              FastAPI, SQLAlchemy 2, Alembic, SQLite
 ├── website/             Vue 3, Element Plus, Vite, vue-i18n
 ├── oc-client/           Lua-клиент и плагины (см. oc-client/README.md)
@@ -61,7 +62,8 @@ gtnh-cyber/
 │   └── deploy/          Docker, бэкап, регистрация роботов
 ├── kb/                  База знаний, ADR, гайды OC/GTNH
 ├── docker-compose.yml
-└── Makefile
+├── Makefile
+└── AGENTS.md            Правила для разработчиков
 ```
 
 ---
@@ -81,8 +83,8 @@ gtnh-cyber/
 ## Быстрый старт (Docker)
 
 ```bash
-git clone <url-вашего-форка> gtnh-cyber
-cd gtnh-cyber
+git clone https://github.com/junkratter/Remote-GTNH-Control.git remote-gtnh-control
+cd remote-gtnh-control
 git submodule update --init --recursive   # опционально: kb/05-vendored
 
 cp .env.example .env
@@ -101,7 +103,7 @@ docker compose up -d --build
 
 Порты в `.env`: `FRONTEND_PORT_HOST`, `BACKEND_PORT_HOST`.
 
-**Данные:** SQLite в Docker volume **`gtnh_cyber_data`** (переживает пересборку образов). Зеркало на хост для бэкапа:
+**Данные:** SQLite в Docker volume **`remote_gtnh_control_data`** (переживает пересборку образов). Зеркало на хост для бэкапа:
 
 ```bash
 chmod +x tools/deploy/*.sh
@@ -175,6 +177,15 @@ make kb-update    # обновить выжимки kb/
 ---
 
 ## Клиент OpenComputers
+
+Исходники Lua-клиента — каталог **`oc-client/`** в репозитории  
+[github.com/junkratter/Remote-GTNH-Control](https://github.com/junkratter/Remote-GTNH-Control): скопируйте дерево на диск компьютера OC или подтягивайте файлы через `wget` с **raw**-URL ветки `main` (см. ниже и `oc-client-install.md`).
+
+**Базовый префикс для `wget` в OpenOS:**
+
+```text
+https://raw.githubusercontent.com/junkratter/Remote-GTNH-Control/main/oc-client/
+```
 
 ### Установка
 
@@ -274,6 +285,7 @@ python import.py \
 
 | Файл | Описание |
 |------|----------|
+| [`AGENTS.md`](AGENTS.md) | Стек, границы, правила для разработчиков |
 | [`kb/01-architecture/overview.md`](kb/01-architecture/overview.md) | Шаблон деплоя, troubleshooting |
 | [`kb/01-architecture/api-contract.md`](kb/01-architecture/api-contract.md) | Контракт `/api/task/*` |
 | [`kb/01-architecture/oc-polling.md`](kb/01-architecture/oc-polling.md) | Long-poll |
@@ -310,30 +322,18 @@ python import.py \
 |------|----------|
 | [`kb/README.md`](kb/README.md) | Как пользоваться kb/ |
 | [`kb/07-glossary.md`](kb/07-glossary.md) | Термины GTNH/OC |
-| [`kb/01-architecture/github-first-deploy.md`](kb/01-architecture/github-first-deploy.md) | Первый push на GitHub |
 | [`oc-client/README.md`](oc-client/README.md) | Кратко про Lua-клиент |
 
 `kb/05-vendored/` — git submodules (upstream). **Только чтение**, не редактировать.
 
----
+## Заметка по секретам
 
-## Публикация на GitHub
-
-Пошагово: установка Git, `git init`, первый push — **[`kb/01-architecture/github-first-deploy.md`](kb/01-architecture/github-first-deploy.md)**.
-
-Перед первым push:
-
-1. `cp oc-client/env.lua.example oc-client/env.lua` — не коммитить `env.lua`.
-2. `cp .env.example .env` — не коммитить `.env`.
-3. `git rm --cached server/.env oc-client/env.lua`, если попадали в индекс.
-4. **Смените `SERVER_TOKEN`**, если токен был в истории git.
-5. Приватные runbook'и (IP, SSH, пути к миру) — вне репозитория.
-6. Не коммитить `data/`, `*.sqlite`, секреты в submodules.
+1. Локально: `cp oc-client/env.lua.example oc-client/env.lua` — не коммитить `env.lua`.
+2. `cp .env.example .env` — не коммитить `.env` / `server/.env`.
+3. Не коммитить `data/`, `*.sqlite`, токены и приватные runbook'и (IP, SSH, пути к миру).
 
 ---
 
 ## Лицензия
 
-**MIT** — [`LICENSE`](LICENSE) (Copyright (c) 2024 z5882852).
-
-Апстрим [RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2) — MIT. Субмодули в `kb/05-vendored/` — свои лицензии в соответствующих каталогах.
+**MIT** — см. [`LICENSE`](LICENSE). Происхождение от ветки RemoteOC-GTNH-AE2 / RemoteOC (MIT). Субмодули в `kb/05-vendored/` — свои лицензии в соответствующих каталогах.

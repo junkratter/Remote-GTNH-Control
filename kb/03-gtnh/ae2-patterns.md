@@ -68,6 +68,11 @@ def program_pattern(client_id, slot, inputs, outputs, kind="processing"):
 ae.requestItem(name, damage, amount, cpuName, label)
 ```
 
+Массовое программирование слотов — `ae.bulkProgramPatterns(plan)` в `oc-client/plugins/ae_patterns.lua`
+(переход на интерфейс + `ae.programPattern` по каждому элементу плана). Это **отдельный** сценарий от
+заказа предмета: `POST /api/autocraft/request` и `POST /api/craft/plan/{id}/start` ставят в очередь только
+`ae.requestItem`, без `bulkProgramPatterns`.
+
 UI шлёт `POST /api/autocraft/request` → бэк формирует задачу с этим
 вызовом → OC отвечает таблицей `{item, failed, computing, done, canceled}`.
 

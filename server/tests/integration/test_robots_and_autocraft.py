@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import uuid
 
 import pytest
 
@@ -165,7 +166,7 @@ async def test_mining_jobs_next_and_patch(client):
         json={"client_id": "robot_miner_01", "kind": "miner"},
     )
     created = await client.post(
-        "/api/robots/mining-jobs",
+        "/api/robots/mining-jobs?enqueue=false",
         json={
             "robot_client_id": "robot_miner_01",
             "dimension": 0,
@@ -196,14 +197,15 @@ async def test_mining_jobs_next_and_patch(client):
 
 @pytest.mark.asyncio
 async def test_mining_job_create_enqueues_oc_task(client):
+    cid = f"robot_miner_enqueue_{uuid.uuid4().hex[:10]}"
     await client.post(
         "/api/robots/register",
-        json={"client_id": "robot_miner_enqueue", "kind": "miner"},
+        json={"client_id": cid, "kind": "miner"},
     )
     created = await client.post(
-        "/api/robots/mining-jobs",
+        "/api/robots/mining-jobs?enqueue=false",
         json={
-            "robot_client_id": "robot_miner_enqueue",
+            "robot_client_id": cid,
             "dimension": 0,
             "x": 3227,
             "y": 73,
@@ -213,19 +215,23 @@ async def test_mining_job_create_enqueues_oc_task(client):
     )
     body = created.json()
     assert body["code"] == 200
-    assert body["data"]["state"] == "running"
+    assert body["data"]["state"] == "pending"
     job_id = body["data"]["id"]
 
+    enq = await client.post(f"/api/robots/mining-jobs/{job_id}/enqueue?deploy=false")
+    assert enq.json()["code"] == 200
+    assert enq.json()["data"]["state"] == "running"
+
     fetched = await client.get(
-        "/api/task/get", headers={"X-Client-ID": "robot_miner_enqueue"}
+        "/api/task/get", headers={"X-Client-ID": cid}
     )
     fbody = fetched.json()
     assert fbody["code"] == 200
     assert fbody["data"]["taskId"] == f"mining_job_{job_id}"
     assert "robot_miner.acceptJob" in fbody["data"]["commands"][0]
 
-    enqueued = await client.post(f"/api/robots/mining-jobs/{job_id}/enqueue?deploy=true")
-    assert enqueued.json()["code"] == 200
+    deploy = await client.post(f"/api/robots/mining-jobs/{job_id}/enqueue?deploy=true")
+    assert deploy.json()["code"] == 200
 
 
 @pytest.mark.asyncio

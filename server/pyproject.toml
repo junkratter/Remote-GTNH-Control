@@ -3,12 +3,12 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "gtnh-cyber-backend"
+name = "remote-gtnh-control-backend"
 version = "2.0.0"
 description = "Backend for GTNH Cyber Supervisor (RemoteOC-GTNH-AE2 fork)."
 requires-python = ">=3.11"
 readme = "../README.md"
-authors = [{ name = "gtnh-cyber" }]
+authors = [{ name = "remote-gtnh-control" }]
 license = { text = "MIT" }
 
 [tool.pytest.ini_options]

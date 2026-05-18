@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+pytest_plugins = ("tests.integration.test_nesql",)
+
 import os
 import tempfile
 from collections.abc import AsyncIterator
@@ -21,7 +23,7 @@ def _set_db_envs(path: str) -> None:
 
 @pytest.fixture(scope="session")
 def db_path() -> str:
-    fd, path = tempfile.mkstemp(prefix="gtnh-cyber-test-", suffix=".sqlite")
+    fd, path = tempfile.mkstemp(prefix="remote-gtnh-control-test-", suffix=".sqlite")
     os.close(fd)
     _set_db_envs(path)
     yield path
@@ -45,6 +47,17 @@ async def app(db_path: str):
         await conn.run_sync(Base.metadata.create_all)
 
     yield application
+
+
+@pytest.fixture(autouse=True)
+def _reset_nesql_connection_between_tests(app):
+    """Session-scoped ASGI app keeps ``app.state``; clear NESQL between tests."""
+    from app.core.nesql_shared import teardown_nesql_state
+    from app.core.quest_cache import clear_quest_cache
+
+    yield
+    teardown_nesql_state(app)
+    clear_quest_cache(app)
 
 
 @pytest_asyncio.fixture

@@ -27,7 +27,7 @@ sequenceDiagram
 
 | Что | Где |
 |-----|-----|
-| Код клиента | репозиторий `gtnh-cyber/oc-client/` |
+| Код клиента | репозиторий `remote-gtnh-control/oc-client/` |
 | Реестр роботов, задания майнера | веб **Роботы** → API `/api/robots/*` |
 | Очередь команд | **Задачи** или кнопки на странице **Роботы** → `/api/task/add` |
 | Карта мира (сканер) | `geolyzer_map.push` → `POST /api/map/scan` |

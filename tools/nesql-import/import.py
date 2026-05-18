@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sqlite3
 import sys
@@ -24,6 +25,57 @@ from collections import defaultdict
 from typing import Iterator, Optional
 
 DEFAULT_BATCH = 5000
+
+
+def _maybe_seed_craft_aliases(nesql_sqlite: Path, enabled: bool) -> None:
+    """Optional post-step: populate ``craft_aliases`` from NESQL OreDict."""
+
+    if not enabled:
+        return
+    if not os.environ.get("SYNC_DATABASE_URL"):
+        print(
+            "[import] --seed-craft-aliases skipped: SYNC_DATABASE_URL not set",
+            flush=True,
+        )
+        return
+    import subprocess
+
+    server_root = Path(__file__).resolve().parents[2] / "server"
+    if not server_root.is_dir():
+        print(f"[import] seed_aliases: server directory not found at {server_root}", flush=True)
+        return
+    cmd = [
+        sys.executable,
+        "-m",
+        "app.modules.craft.seed_aliases",
+        "--nesql",
+        str(nesql_sqlite.resolve()),
+    ]
+    print("[import] running seed_aliases → SYNC_DATABASE_URL", flush=True)
+    r = subprocess.run(cmd, cwd=str(server_root), env=os.environ.copy())
+    if r.returncode != 0:
+        print(f"[import] seed_aliases exited with code {r.returncode}", flush=True)
+
+
+def _invalidate_optional_redis_nesql_cache() -> None:
+    """Drop ``nesql:*`` keys after import if backend cache uses Redis (plan A6)."""
+
+    url = os.environ.get("OPTIONAL_REDIS_URL")
+    if not url:
+        return
+    try:
+        import redis
+
+        r = redis.Redis.from_url(url, decode_responses=True)
+        deleted = 0
+        for k in r.scan_iter(match="nesql:*"):
+            r.delete(k)
+            deleted += 1
+        if deleted:
+            print(f"[import] redis: deleted {deleted} nesql:* key(s)", flush=True)
+    except Exception as exc:
+        print(f"[import] OPTIONAL_REDIS_URL invalidate nesql:* failed: {exc}", flush=True)
+
 
 SCHEMA_DDL = """
 CREATE TABLE IF NOT EXISTS nesql_items (
@@ -1131,6 +1183,34 @@ def _record_meta(sqlite_conn: sqlite3.Connection, module: str, count: int) -> No
     sqlite_conn.commit()
 
 
+def _build_fts_indexes(sqlite_conn: sqlite3.Connection) -> None:
+    """FTS5 mirrors for item and quest search (plan A3)."""
+    sqlite_conn.executescript(
+        """
+        DROP TABLE IF EXISTS nesql_items_fts;
+        CREATE VIRTUAL TABLE nesql_items_fts USING fts5(
+            localized_name, unlocal_name,
+            content='nesql_items', content_rowid='id', tokenize='unicode61'
+        );
+        INSERT INTO nesql_items_fts(rowid, localized_name, unlocal_name)
+            SELECT id, localized_name, unlocal_name FROM nesql_items;
+
+        DROP TABLE IF EXISTS nesql_quests_fts;
+        CREATE VIRTUAL TABLE nesql_quests_fts USING fts5(
+            name, description,
+            content='nesql_quests', content_rowid='id', tokenize='unicode61'
+        );
+        INSERT INTO nesql_quests_fts(rowid, name, description)
+            SELECT id, name, description FROM nesql_quests;
+        """
+    )
+    sqlite_conn.execute(
+        "INSERT OR REPLACE INTO nesql_import_meta (module, row_count, imported_at) "
+        "VALUES ('_fts', 1, CURRENT_TIMESTAMP)"
+    )
+    sqlite_conn.commit()
+
+
 # --- CLI ---------------------------------------------------------------------
 
 
@@ -1161,6 +1241,11 @@ def main() -> int:
         "--no-materialize",
         action="store_true",
         help="Skip building inputs_json / outputs_json on nesql_recipes",
+    )
+    parser.add_argument(
+        "--seed-craft-aliases",
+        action="store_true",
+        help="After import, run server craft alias seed (needs SYNC_DATABASE_URL; see seed_aliases).",
     )
     args = parser.parse_args()
 
@@ -1208,6 +1293,9 @@ def main() -> int:
             or {"recipes", "recipe_inputs", "recipe_outputs"} <= set(requested)
         ):
             _materialize_recipe_json(sqlite_conn)
+        _build_fts_indexes(sqlite_conn)
+        _invalidate_optional_redis_nesql_cache()
+        _maybe_seed_craft_aliases(args.dst, args.seed_craft_aliases)
     finally:
         sqlite_conn.close()
     return 0
