@@ -3,14 +3,14 @@
         @change="handleCpuSelected" @visible-change="handleVisibleChange">
         <template #header>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <el-button size="small" @click="getCpuList" :loading="headerLoading">刷新</el-button>
-                <el-text size="small">最近更新: {{ lastUpdate }}</el-text>
+                <el-button size="small" @click="getCpuList" :loading="headerLoading">{{ $t('common.refresh') }}</el-button>
+                <el-text size="small">{{ $t('cpu.last_update') }}: {{ lastUpdate }}</el-text>
             </div>
         </template>
         <template #default="{ item }">
             <template v-if="item.value">
-                <el-tag v-if="item.busy" type="warning" effect="light">繁忙</el-tag>
-                <el-tag v-else type="success" effect="light">空闲</el-tag>
+                <el-tag v-if="item.busy" type="warning" effect="light">{{ $t('cpu.busy') }}</el-tag>
+                <el-tag v-else type="success" effect="light">{{ $t('cpu.idle') }}</el-tag>
             </template>
             <span style="margin-left: 10px;">{{ item.name }}</span>
         </template>
@@ -29,11 +29,11 @@ export default {
             type: Array,
             required: false,
         },
-        status: {  // 传入的值为 'all'、'busy' 或 'free'，默认为 'all'
+        status: {  // 'all' | 'busy' | 'free'
             type: String,
             required: false,
         },
-        // 是否必须已命名
+        // Require a named CPU when true
         onlyNamed: {
             type: Boolean,
             required: false,
@@ -57,11 +57,11 @@ export default {
                 label: 'name',
                 value: 'value',
             },
-            placeholder: this.autoSelect ? '自动分配' : '请选择CPU',
+            placeholder: this.autoSelect ? this.$t('cpu.auto_alloc') : this.$t('cpu.select'),
             selectedCpu: '',
             headerLoading: false,
             firstLoad: true,
-            lastUpdate: '未知',
+            lastUpdate: this.$t('common.unknown'),
         };
     },
     watch: {
@@ -98,7 +98,7 @@ export default {
             if (data.result) {
                 let result = JSON.parse(data.result[0]);
                 if (result.message === undefined || result.message !== 'success') {
-                    this.$message.warning(result.message ? result.message : "未知错误");
+                    this.$message.warning(result.message ? result.message : this.$t('common.unknown_error'));
                     return
                 }
                 this.lastUpdate = data.completed_time.replace('T', ' ').replace('Z', ' ').split('.')[0];
@@ -130,11 +130,11 @@ export default {
                     this.handleVisibleChange(true);
                 }
                 if (!this.firstLoad) {
-                    this.$message.success(`刷新CPU列表成功!`);
+                    this.$message.success(this.$t('cpu.refresh_success'));
                 }
                 this.$emit('handleLoadCpuList', cpuList);
             } else {
-                this.$message.warning(`返回数据为空!`);
+                this.$message.warning(this.$t('common.empty_response'));
             }
             this.firstLoad = false;
         },
@@ -154,7 +154,7 @@ export default {
                 });
                 if (this.autoSelect) {
                     this.cpuOptions.push({
-                        name: '自动分配',
+                        name: this.$t('cpu.auto_alloc'),
                         value: null,
                     });
                 }

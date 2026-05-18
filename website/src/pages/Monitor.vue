@@ -1,17 +1,17 @@
 <template>
     <div class="statistic-container">
         <StatisticCard
-            title="兰波顿存储电量"
+            :title="$t('monitor.eu_stored')"
             :displayValue="statisticTransition.EUStored"
             :change="statistic.EUStored.change"
             :formatter="formatNumber"
         />
         <StatisticCard
-            title="无线电网电量"
+            :title="$t('monitor.wireless_eu')"
             :displayValue="statisticTransition.totalWirelessEU"
             :change="statistic.totalWirelessEU.change"
             :formatter="formatNumber"
-            tooltip="该信息来源为兰波顿电容"
+            :tooltip="$t('monitor.wireless_eu_tooltip')"
         />
     </div>
 
@@ -67,11 +67,11 @@ export default {
                     change: 0,
                 },
             },
-            // 图表相关
-            timeRange: 4, // 默认4小时
-            granularity: 'none', // 默认无粒度
-            customStartTime: null, // 自定义开始时间（Unix时间戳）
-            customEndTime: null, // 自定义结束时间（Unix时间戳）
+            // Chart filters
+            timeRange: 4, // default: last 4 hours
+            granularity: 'none', // no aggregation bucket
+            customStartTime: null, // Unix start (custom range)
+            customEndTime: null, // Unix end (custom range)
             chartHistoryData: [],
             chartLoading: false,
         };
@@ -101,24 +101,23 @@ export default {
     },
     watch: {
         timeRange(newVal) {
-            // 如果不是自定义模式，则直接获取数据
+            // Preset range: fetch immediately
             if (newVal !== 'custom') {
                 this.fetchChartData();
             }
         },
         granularity() {
-            // granularity 变化时触发图表组件内部重新处理数据
-            // 由于 historyData 没变，需要重新获取以触发处理
+            // Granularity change: refetch so TrendChart recomputes
             this.fetchChartData();
         },
         customStartTime() {
-            // 自定义时间变化时重新获取数据
+            // Custom window changed → refetch
             if (this.timeRange === 'custom') {
                 this.fetchChartData();
             }
         },
         customEndTime() {
-            // 自定义时间变化时重新获取数据
+            // Custom window changed → refetch
             if (this.timeRange === 'custom') {
                 this.fetchChartData();
             }
@@ -148,7 +147,7 @@ export default {
         },
         handleStatisticData(data) {
             if (!data || !data.history || data.history.length === 0) {
-                ElMessage.warning('暂无历史数据');
+                ElMessage.warning(this.$t('monitor.no_history'));
                 return;
             }
 
@@ -178,7 +177,7 @@ export default {
 
             } catch (e) {
                 console.error('Error parsing statistic data:', e, data);
-                ElMessage.warning('数据解析失败');
+                ElMessage.warning(this.$t('monitor.parse_failed'));
             }
         },
         async fetchChartData() {
@@ -187,7 +186,7 @@ export default {
                 let startTime, endTime;
                 
                 if (this.timeRange === 'custom') {
-                    // 使用自定义时间范围
+                    // Explicit custom range
                     if (!this.customStartTime || !this.customEndTime) {
                         this.chartLoading = false;
                         return;
@@ -195,7 +194,7 @@ export default {
                     startTime = this.customStartTime;
                     endTime = this.customEndTime;
                 } else {
-                    // 使用预设时间范围
+                    // Preset relative range
                     endTime = Math.floor(Date.now() / 1000);
                     startTime = endTime - this.timeRange * 3600;
                 }

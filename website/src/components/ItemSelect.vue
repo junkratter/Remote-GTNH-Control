@@ -4,8 +4,8 @@
         @visible-change="handleVisibleChange" popper-class="item-select-popper">
         <template #header>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <el-button size="small" @click="getAllSilempleItems" :loading="headerLoading">刷新</el-button>
-                <el-text size="small">最近更新: {{ lastUpdate }}</el-text>
+                <el-button size="small" @click="getAllSilempleItems" :loading="headerLoading">{{ $t('common.refresh') }}</el-button>
+                <el-text size="small">{{ $t('cpu.last_update') }}: {{ lastUpdate }}</el-text>
             </div>
         </template>
 
@@ -51,7 +51,7 @@ export default {
             type: Array,
             required: false,
         },
-        type: {  // 传入的值为 'all'、'items' 或 'fluids'，默认为 'all'
+        type: {  // 'all' | 'items' | 'fluids'
             type: String,
             required: false,
             default: 'all',
@@ -75,12 +75,12 @@ export default {
                 label: 'title',
                 value: 'title',
             },
-            placeholder: '在此输入搜索并选择物品',
+            placeholder: this.$t('items.search_placeholder'),
             selectedItem: '',
             headerLoading: false,
             loading: true,
             firstLoad: true,
-            lastUpdate: '未知',
+            lastUpdate: this.$t('common.unknown'),
         };
     },
     watch: {
@@ -119,22 +119,22 @@ export default {
                 let itemList = data.result;
                 this.lastUpdate = data.completed_time.replace('T', ' ').replace('Z', ' ').split('.')[0];
 
-                // 遍历每个物品，添加 icon 和 title 属性
+                // Enrich rows with icon + title for the select UI
                 itemList.forEach(item => {
                     let item_ = itemUtil.getItem(item)
                     item.icon = itemUtil.getItemIcon(item_);
-                    item.title = itemUtil.getName(item_, item, data) || item.label;
+                    item.title = itemUtil.getName(item_, item, item) || item.label;
                 });
                 if (!this.options) {
                     this.itemList = itemList;
                     this.handleVisibleChange(true);
                 }
                 if (!this.firstLoad) {
-                    this.$message.success(`获取物品列表成功!`);
+                    this.$message.success(this.$t('items.refresh_success'));
                 }
                 this.$emit('handleLoadItemList', itemList);
             } else {
-                this.$message.warning(`返回数据为空!`);
+                this.$message.warning(this.$t('common.empty_response'));
             }
             this.firstLoad = false;
         },
@@ -205,7 +205,7 @@ export default {
 }
 
 .unknow-icon {
-    /* 居中 */
+    /* Center */
     position: absolute;
     top: 50%;
     left: 50%;

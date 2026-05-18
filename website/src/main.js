@@ -1,15 +1,12 @@
 import { createApp, ref } from 'vue'
 import App from './App.vue'
 
-//导入路由
 import router from './router/index'
+import { i18n } from './i18n'
 
-// 导入事件总线
 import eventBus from 'vue3-eventbus'
 
-//全局导入Element plus
 import ElementPlus from 'element-plus'
-import locale from 'element-plus/es/locale/lang/zh-cn'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
@@ -17,8 +14,9 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 const app = createApp(App);
 
 app.use(router);
+app.use(i18n);
 app.use(eventBus);
-app.use(ElementPlus, { locale });
+app.use(ElementPlus);
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
@@ -27,20 +25,21 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.provide('detailManageTable', ref(true));
 
 
-// 判断是否为移动设备
-const isMobile = ref(window.innerWidth <= 768);
+// Reactive viewport flag. The 900px breakpoint matches the one in
+// public/css/liquid-glass.css where the aside collapses into a drawer.
+const MOBILE_BREAKPOINT = 900;
+const isMobile = ref(window.innerWidth <= MOBILE_BREAKPOINT);
 function updateDeviceType() {
-  isMobile.value = window.innerWidth <= 768;
+  isMobile.value = window.innerWidth <= MOBILE_BREAKPOINT;
 }
-window.addEventListener('resize', updateDeviceType);
+window.addEventListener('resize', updateDeviceType, { passive: true });
 app.provide('isMobile', isMobile);
 
-// 全局变量-仓库地址
+// Global: upstream repository URL (legacy / about page)
 app.config.globalProperties.$defaultLinkPrefix = "https://github.com";
 app.config.globalProperties.$userName = "z5882852";
 app.config.globalProperties.$repoName = "RemoteOC-GTNH-AE2";
-// GTNH版本
-app.config.globalProperties.$gameVersion = "2.8.0";
+app.config.globalProperties.$gameVersion = "2.8.4";
 
 app.mount('#app')
 

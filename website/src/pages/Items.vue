@@ -4,50 +4,50 @@
             <el-card class="control-card" shadow="hover">
                 <div v-if="isMobile" class="control-bar">
                     <div class="segmented-container">
-                        <el-segmented v-model="showCraft" :options="['全部', '可下单']" size="default" />
-                        <el-segmented class="liquid-segmented" v-model="showLiquid" :options="['全部', '物品', '液体']"
+                        <el-segmented v-model="showCraft" :options="craftOptions" size="default" />
+                        <el-segmented class="liquid-segmented" v-model="showLiquid" :options="liquidOptions"
                             size="default" />
                     </div>
                     <div class="search-container">
-                        <el-input v-model="searchText" class="item-search" placeholder="请输入信息以查询">
+                        <el-input v-model="searchText" class="item-search" :placeholder="$t('items.search_placeholder')">
                             <template #suffix>
                                 <el-icon class="el-input__icon">
                                     <search />
                                 </el-icon>
                             </template>
                             <template #prepend>
-                                <el-select v-model="searchType" placeholder="查询类型" style="width: 75px">
-                                    <el-option label="物品名" value="title" />
-                                    <el-option label="标签名" value="label" />
+                                <el-select v-model="searchType" :placeholder="$t('items.search_type')" style="width: 75px">
+                                    <el-option :label="$t('items.title_field')" value="title" />
+                                    <el-option :label="$t('items.label_field')" value="label" />
                                     <el-option label="name" value="name" />
                                 </el-select>
                             </template>
                         </el-input>
-                        <el-button type="primary" @click="getItems">获取物品信息</el-button>
+                        <el-button type="primary" @click="getItems">{{ $t('items.get') }}</el-button>
                     </div>
                 </div>
                 <div v-else class="control-bar">
                     <div style="display: flex;">
-                        <el-segmented v-model="showCraft" :options="['全部', '可下单']" size="default" />
-                        <el-segmented style="margin: 0 16px;" v-model="showLiquid" :options="['全部', '物品', '液体']"
+                        <el-segmented v-model="showCraft" :options="craftOptions" size="default" />
+                        <el-segmented style="margin: 0 16px;" v-model="showLiquid" :options="liquidOptions"
                             size="default" />
-                        <el-input v-model="searchText" class="item-search" placeholder="请输入信息以查询">
+                        <el-input v-model="searchText" class="item-search" :placeholder="$t('items.search_placeholder')">
                             <template #suffix>
                                 <el-icon class="el-input__icon">
                                     <search />
                                 </el-icon>
                             </template>
                             <template #prepend>
-                                <el-select v-model="searchType" placeholder="查询类型" style="width: 100px">
-                                    <el-option label="物品名" value="title" />
-                                    <el-option label="标签名" value="label" />
+                                <el-select v-model="searchType" :placeholder="$t('items.search_type')" style="width: 100px">
+                                    <el-option :label="$t('items.title_field')" value="title" />
+                                    <el-option :label="$t('items.label_field')" value="label" />
                                     <el-option label="name" value="name" />
                                 </el-select>
                             </template>
                         </el-input>
                     </div>
 
-                    <el-button type="primary" @click="getItems">获取物品信息</el-button>
+                    <el-button type="primary" @click="getItems">{{ $t('items.get') }}</el-button>
                 </div>
             </el-card>
         </el-header>
@@ -75,15 +75,15 @@
                             <div class="item-info">
                                 <div class="ellipsis" :title="item.title" v-html="parseLineColorCode(item.title)"></div>
                                 <div class="words" :title="item.label" v-html="parseLineColorCode(item.label)"></div>
-                                <div class="words">数量:
+                                <div class="words">{{ $t('items.amount') }}:
                                     <NumberFormat :number="item.size" />
                                 </div>
-                                <div v-if="item.isCraftable"><el-tag size="small" type="success">可合成</el-tag></div>
+                                <div v-if="item.isCraftable"><el-tag size="small" type="success">{{ $t('items.craftable_tag') }}</el-tag></div>
                                 <el-tooltip placement="top" effect="dark">
                                     <template #content>
                                         <div style="font-size: 12px; color: #aaa;">Tooltip</div>
                                         <div>{{ item.title }}</div>
-                                        <div v-if="item.size > 0">存储物品: <span @click="copyToClipboard(item.size)">{{
+                                        <div v-if="item.size > 0">{{ $t('items.stored') }}: <span @click="copyToClipboard(item.size)">{{
                                             item.size }}</span></div>
                                         <div class="words copy-container" v-for="(info, index) in item.tooltip"
                                             :key="index" @click="copyToClipboard(info)">
@@ -92,13 +92,13 @@
                                         <div class="words copy-container"
                                             @click="copyToClipboard(`${item.data.name}:${item.data.damage}`)">{{
                                                 item.data.name }}:{{ item.data.damage }}</div>
-                                        <div style="font-size: 12px; color: #aaa;">其他属性</div>
+                                        <div style="font-size: 12px; color: #aaa;">{{ $t('items.other_props') }}</div>
                                         <div v-for="(value, key, index) in item.data" :key="index"
                                             :title="typeof value === 'object' ? JSON.stringify(value) : value"
                                             @click="copyToClipboard(value)" class="words copy-container">
                                             {{ key }}: {{ value }}
                                         </div>
-                                        <div style="font-size: 10px; color: #aaa;">点击复制属性值</div>
+                                        <div style="font-size: 10px; color: #aaa;">{{ $t('items.click_copy') }}</div>
                                     </template>
                                     <el-icon size="large" class="info-icon">
                                         <InfoFilled />
@@ -106,10 +106,10 @@
                                 </el-tooltip>
                                 <el-tooltip placement="top" effect="dark" v-if="item.isCraftable">
                                     <template #content>
-                                        下单制作
+                                        {{ $t('items.craft_action') }}
                                     </template>
                                     <el-icon size="large" class="craft-icon"
-                                        @click="openCraftDialog(item.title, item.data.name, item.data.damage, item.label)">
+                                        @click="openCraftDialog(item.title, item.data.name, item.data.damage, item.meLabel)">
                                         <GoodsFilled />
                                     </el-icon>
                                 </el-tooltip>
@@ -119,8 +119,8 @@
                 </div>
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        <span style="display: flex;">最近更新时间: {{ lastUpdate }}</span>
-                        <span v-if="isMobile" style="display: flex;">共 {{ page.total }} 条</span>
+                        <span style="display: flex;">{{ $t('items.last_update') }}: {{ lastUpdate }}</span>
+                        <span v-if="isMobile" style="display: flex;">{{ $t('items.total_count', { n: page.total }) }}</span>
                     </div>
                     <el-pagination style="display: flex;" v-model:current-page="page.current"
                         v-model:page-size="page.size" :pager-count="isMobile ? 5 : 7" :page-sizes="[50, 100, 200, 400]"
@@ -133,32 +133,32 @@
         </el-main>
         <el-dialog v-model="showCraftDialog" :title="craftDialogTitle" class="craft-dialog" align-center>
             <el-form :model="craft">
-                <el-form-item label="下单数量">
-                    <el-input v-model="craft.amount" type="number" placeholder="请输入下单数量" />
+                <el-form-item :label="$t('items.craft_amount')">
+                    <el-input v-model="craft.amount" type="number" :placeholder="$t('items.amount_placeholder')" />
                 </el-form-item>
-                <el-form-item label="选择CPU">
+                <el-form-item :label="$t('items.select_cpu')">
                     <div style="width: 100%; display: flex; justify-content: space-between;">
                         <el-tooltip>
                             <template #content>
-                                {{ craft.cpuOptions.length === 0 ? '请先获取CPU列表' : '请选择CPU' }}
+                                {{ craft.cpuOptions.length === 0 ? $t('items.fetch_cpus_first') : $t('cpu.select') }}
                             </template>
                             <el-select-v2 ref="select" :disabled="craft.cpuOptions.length === 0"
-                                v-model="craft.selectCpu" :options="craft.cpuOptions" placeholder="自动分配"
+                                v-model="craft.selectCpu" :options="craft.cpuOptions" :placeholder="$t('cpu.auto_alloc')"
                                 style="width: 280px">
                                 <template #footer>
-                                    <span>仅能选择已命名且空闲的CPU</span>
+                                    <span>{{ $t('items.cpu_only_named_idle') }}</span>
                                 </template>
                             </el-select-v2>
                         </el-tooltip>
-                        <el-button type="primary" @click="getCpuList" :loading="craft.cpuBthLoading">获取CPU</el-button>
+                        <el-button type="primary" @click="getCpuList" :loading="craft.cpuBthLoading">{{ $t('items.get_cpu') }}</el-button>
                     </div>
                 </el-form-item>
             </el-form>
             <template #footer>
                 <div class="dialog-footer">
-                    <el-button @click="showCraftDialog = false">取消</el-button>
+                    <el-button @click="showCraftDialog = false">{{ $t('common.cancel') }}</el-button>
                     <el-button type="primary" @click="craftItem" :loading="craft.btnLoading">
-                        确认
+                        {{ $t('common.confirm') }}
                     </el-button>
                 </div>
             </template>
@@ -187,8 +187,8 @@ export default {
             headerLoading: false,
             headerLoadingText: "",
             lastUpdate: "",
-            showCraft: "全部",
-            showLiquid: "全部",
+            showCraft: "all",
+            showLiquid: "all",
             searchType: "title",
             searchText: "",
             items: [],
@@ -200,7 +200,7 @@ export default {
             },
             pollingController: null,
             showCraftDialog: false,
-            craftDialogTitle: "下单",
+            craftDialogTitle: "",
             craft: {
                 name: null,
                 damage: null,
@@ -220,8 +220,24 @@ export default {
             parseLineColorCode,
         };
     },
+    computed: {
+        craftOptions() {
+            return [
+                { label: this.$t('items.filter.all'), value: 'all' },
+                { label: this.$t('items.filter.craftable'), value: 'craftable' },
+            ];
+        },
+        liquidOptions() {
+            return [
+                { label: this.$t('items.filter.all'), value: 'all' },
+                { label: this.$t('items.filter.items'), value: 'items' },
+                { label: this.$t('items.filter.fluids'), value: 'fluids' },
+            ];
+        },
+    },
     mounted() {
-        this.startPolling("getAllItems");
+        this.craftDialogTitle = this.$t('items.craft_dialog_title');
+        this.getItems();
     },
     methods: {
         handlePaginationChange() {
@@ -241,19 +257,50 @@ export default {
                 console.log('Polling stopped.');
             }
         },
+        normalizeAeItems(result) {
+            if (!result) return [];
+            if (!Array.isArray(result)) return [];
+            const flat = [];
+            const visit = (entry) => {
+                if (!entry) return;
+                if (Array.isArray(entry)) {
+                    entry.forEach(visit);
+                    return;
+                }
+                if (typeof entry === 'object' && (entry.name || entry.label)) {
+                    flat.push(entry);
+                    return;
+                }
+                if (typeof entry === 'string') {
+                    try {
+                        const parsed = JSON.parse(entry);
+                        if (parsed?.message === 'success' && Array.isArray(parsed.data)) {
+                            parsed.data.forEach(visit);
+                        } else {
+                            visit(parsed);
+                        }
+                    } catch {
+                        /* ignore */
+                    }
+                }
+            };
+            result.forEach(visit);
+            return flat;
+        },
         handleTaskResult(data) {
-            // console.log('Task result:', data);
+            if (data.status && data.status !== 'completed') {
+                return;
+            }
             this.loading = false;
 
             if (data.result) {
                 try {
-                    let result = data.result;
-                    this.lastUpdate = data.completed_time ? data.completed_time.split(".")[0].replace("T", " ") : '未知';
+                    this.lastUpdate = data.completed_time ? data.completed_time.split(".")[0].replace("T", " ") : this.$t('common.unknown');
                     let isShowLiquidImage = Setting.get("showFluid");
-                    let items = result;
+                    const items = this.normalizeAeItems(data.result);
                     let new_items = []
                     for (let item of items) {
-                        let { image, title, size, isCraftable, label, ...data } = item;
+                        let { image, title, size, isCraftable, label: meLabel, ...data } = item;
                         if (data.hasTag && nbt) {
                             nbt.parse(nbt.base64ToUint8Array(data.tag), (e, unzipNbt) => {
                                 if (e) {
@@ -271,16 +318,13 @@ export default {
                         }
                         let new_item = {
                             image: image,
-                            title: itemUtil.getName(item_, item, data) || item.label,
-                            label: item.label,
+                            title: itemUtil.getName(item_, item, data) || meLabel,
+                            label: itemUtil.getRegistrySubtitle(item),
+                            meLabel,
                             size: item.size,
                             tooltip: item_ && item_.tooltip || [],
                             isCraftable: item.isCraftable,
                             data: data,
-                        }
-                        // 伪合成处理
-                        if (new_item.data && new_item.data.name === 'minecraft:paper' && new_item.label !== 'Paper' && new_item.title === '纸') {
-                            new_item.title = `${new_item.title}(${new_item.label})`
                         }
                         new_items.push(new_item);
                     }
@@ -291,16 +335,17 @@ export default {
                     this.$message.warning(e);
                 }
             } else {
-                this.$message.warning(`返回数据为空!`);
+                this.$message.warning(this.$t('common.empty_response'));
             }
         },
         handleTaskUploading(data) {
-            if (this.headerLoadingText === "客户端正在上传数据，请稍后... Task id: getAllItems") {
+            const uploadingText = this.$t('items.uploading', { task: 'getAllItems' });
+            if (this.headerLoadingText === uploadingText) {
                 return
             }
             this.headerLoading = false;
             this.$nextTick(() => {
-                this.headerLoadingText = "客户端正在上传数据，请稍后... Task id: getAllItems";
+                this.headerLoadingText = uploadingText;
                 this.headerLoading = true;
             });
         },
@@ -309,8 +354,13 @@ export default {
             this.headerLoading = false;
         },
         getItems() {
+            this.stopPolling();
+            this.items = [];
+            this.showItems = [];
+            this.page.total = 0;
+            this.loading = true;
             this.headerLoading = true;
-            this.headerLoadingText = "请求已发送，等待客户端响应... Task id: getAllItems";
+            this.headerLoadingText = this.$t('items.request_sent', { task: 'getAllItems' });
             addTask("getAllItems", null, () => {
                 this.startPolling("getAllItems")
             })
@@ -322,8 +372,8 @@ export default {
             try {
                 const textarea = document.createElement('textarea');
                 textarea.value = text;
-                textarea.style.position = 'fixed'; // 避免滚动页面
-                textarea.style.opacity = '0'; // 隐藏
+                textarea.style.position = 'fixed'; // avoid scrolling the page
+                textarea.style.opacity = '0'; // hide off-screen
                 document.body.appendChild(textarea);
                 textarea.focus();
                 textarea.select();
@@ -332,17 +382,17 @@ export default {
 
                 if (success) {
                     this.$message({
-                        message: '复制成功!',
+                        message: this.$t('items.copy_success'),
                         type: 'success'
                     });
                 } else {
-                    console.error('execCommand复制失败');
-                    throw new Error('execCommand复制失败');
+                    console.error('execCommand copy failed');
+                    throw new Error('execCommand copy failed');
                 }
             } catch (err) {
-                console.error('复制失败:', err);
+                console.error('copy failed:', err);
                 this.$message({
-                    message: '复制失败',
+                    message: this.$t('items.copy_failed'),
                     type: 'error'
                 });
             }
@@ -352,7 +402,7 @@ export default {
             this.craft.damage = damage;
             this.craft.amount = 1;
             this.craft.label = label;
-            this.craftDialogTitle = "下单-" + title;
+            this.craftDialogTitle = this.$t('items.craft_dialog_with_name', { name: title });
             this.showCraftDialog = true;
         },
         craftItem() {
@@ -373,19 +423,23 @@ export default {
         },
         updateShowItems() {
             let filteredItems = this.items;
-            if (this.showCraft === "可下单") {
+            if (this.showCraft === "craftable") {
                 filteredItems = filteredItems.filter(item => item.isCraftable);
             }
-            if (this.showLiquid === "物品") {
+            if (this.showLiquid === "items") {
                 filteredItems = filteredItems.filter(item => item.data.name !== "ae2fc:fluid_drop");
-            } else if (this.showLiquid === "液体") {
+            } else if (this.showLiquid === "fluids") {
                 filteredItems = filteredItems.filter(item => item.data.name === "ae2fc:fluid_drop");
             }
 
             if (this.searchText) {
                 filteredItems = filteredItems.filter(item => {
                     if (this.searchType === "label") {
-                        return item.label && item.label.toLowerCase().includes(this.searchText.toLowerCase());
+                        const q = this.searchText.toLowerCase();
+                        return (
+                            (item.meLabel && item.meLabel.toLowerCase().includes(q)) ||
+                            (item.label && item.label.toLowerCase().includes(q))
+                        );
                     } else if (this.searchType === "name") {
                         return item.data.name && item.data.name.toLowerCase().includes(this.searchText.toLowerCase());
                     } else {
@@ -415,15 +469,15 @@ export default {
                                 label: item.name,
                             }))
                             this.craft.cpuOptions.push({
-                                label: "自动分配",
+                                label: this.$t('cpu.auto_alloc'),
                                 value: null,
                             })
-                            this.$message.success(`获取CPU列表成功`)
+                            this.$message.success(this.$t('cpu.refresh_success'))
                         } else {
-                            this.$message.error(`获取CPU列表失败: ${cpuInfo.message}`)
+                            this.$message.error(this.$t('cpu.refresh_failed', { msg: cpuInfo.message }))
                         }
                     } else {
-                        this.$message.error("获取CPU列表失败")
+                        this.$message.error(this.$t('cpu.refresh_failed', { msg: this.$t('common.unknown_error') }))
                     }
                 });
             })
@@ -477,7 +531,7 @@ export default {
     }
 }
 
-/* 移动端适配 control-card 高100px */
+/* Mobile: control-card height ~100px */
 @media screen and (max-width: 768px) {
     .control-header-item {
         width: 100%;
@@ -573,7 +627,7 @@ export default {
     }
 }
 
-/* 移动端适配 control-card 高100px */
+/* Mobile: control-card height ~100px */
 @media screen and (max-width: 768px) {
     .control-card {
         height: 100px;
@@ -675,7 +729,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* 让信息块顶部对齐 */
+    /* Align info blocks to the top */
     width: calc(100% - 60px);
     line-height: 1.5;
 }
@@ -689,7 +743,7 @@ export default {
 }
 
 .unknow-icon {
-    /* 居中 */
+    /* Center */
     position: absolute;
     top: 50%;
     left: 50%;

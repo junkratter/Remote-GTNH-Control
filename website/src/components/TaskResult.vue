@@ -1,13 +1,13 @@
 <template>
-    <el-tooltip effect="dark" content="点击查看详情" placement="top">
-        <el-check-tag :checked="true" :type="taskStatus[info.data.status].type"
+    <el-tooltip effect="dark" :content="$t('tasks.click_for_details')" placement="top">
+        <el-check-tag :checked="true" :type="statusType(info.data.status)"
             @click="showInfoDialog = !showInfoDialog">
-            {{ taskStatus[info.data.status].text }}
+            {{ $t('tasks.status.' + info.data.status) }}
         </el-check-tag>
     </el-tooltip>
 
-    <el-dialog v-model="showInfoDialog" title="任务详情" align-center class="info-dialog">
-        <el-text>任务ID: <span>{{ info.id }}</span></el-text>
+    <el-dialog v-model="showInfoDialog" :title="$t('tasks.details')" align-center class="info-dialog">
+        <el-text>{{ $t('tasks.task_id') }}: <span>{{ info.id }}</span></el-text>
         <div class="info-container">
             <code>
             <pre>{{ info.data_text }}</pre>
@@ -19,23 +19,11 @@
 <script>
 import { fetchStatusOnce } from '@/utils/task'
 
-const taskStatus = {
-    "ready": {
-        text: "等待请求中",
-        type: "primary",
-    },
-    "pending": {
-        text: "等待响应中",
-        type: "warning",
-    },
-    "completed": {
-        text: "已完成",
-        type: "success",
-    },
-    "unknown": {
-        text: "未知",
-        type: "danger",
-    },
+const statusTypeMap = {
+    ready: 'primary',
+    pending: 'warning',
+    completed: 'success',
+    unknown: 'danger',
 }
 
 export default {
@@ -48,7 +36,6 @@ export default {
     data() {
         return {
             showInfoDialog: false,
-            taskStatus,
             info: {
                 id: "",
                 data: {
@@ -58,15 +45,10 @@ export default {
             }
         };
     },
-    watch: {
-        task_id: {
-            handler(new_task_id) {
-                this.fetchTaskInfo(new_task_id);
-            },
-            deep: true,
-        },
-    },
     methods: {
+        statusType(status) {
+            return statusTypeMap[status] || 'info';
+        },
         fetchTaskInfo(task_id) {
             fetchStatusOnce(task_id, (res) => {
                 this.info.id = task_id;
@@ -74,7 +56,14 @@ export default {
                 this.info.data_text = JSON.stringify(res, null, 4);
             });
         },
-
+    },
+    watch: {
+        task_id: {
+            handler(new_task_id) {
+                this.fetchTaskInfo(new_task_id);
+            },
+            deep: true,
+        },
     },
     created() {
         this.fetchTaskInfo(this.task_id);

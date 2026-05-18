@@ -1,0 +1,71 @@
+local event = require("event")
+
+local executor = require("src.executor")
+local env = require("env")
+local logger = require("lib/logger")
+
+local timerId  -- timer handle
+local shouldExit = false  -- set on interrupt
+
+local args = {...}
+if #args >= 1 then
+    if args[1] == "--debug" then
+        logger.set_level("DEBUG")
+        logger.debug("Debug mode has been enabled.")
+    end
+end
+
+local function pollServer()
+    local success, info = xpcall(function()
+        if shouldExit then
+            logger.info("Exiting polling...")
+            event.cancel(timerId)
+            return
+        end
+
+        logger.debug("Polling... Free Memory: ".. require("computer").freeMemory())
+
+        local taskId, command_table, isChunked = executor.fetchCommands()
+        os.sleep(0)
+
+        if isChunked then
+            logger.debug("Using chunked upload")
+        end
+
+        if taskId and command_table then
+            local command_result_table = executor.processCommands(command_table, isChunked)
+            os.sleep(0)
+
+            logger.debug("Reporting results for Task ID: " .. tostring(taskId))
+            if isChunked then
+                executor.reportChunkedResults(taskId, command_result_table[1])
+            else
+                executor.reportResults(taskId, command_result_table)
+            end
+        else
+            logger.debug("No commands received or invalid response.")
+        end
+    end, debug.traceback)
+
+    if not success then
+        logger.error(info)
+    end
+end
+
+
+timerId = event.timer(env.pollingInterval, pollServer, math.huge)
+
+
+logger.info("Program started at " .. os.date("%Y-%m-%d %H:%M:%S"))
+while true do
+    local eventType = event.pull()
+    if eventType == "interrupted" then
+        shouldExit = true
+        if event.cancel(timerId) then
+            logger.info("Interrupt received, shutting down...")
+        else
+            logger.error("error")
+        end
+        break
+    end
+end

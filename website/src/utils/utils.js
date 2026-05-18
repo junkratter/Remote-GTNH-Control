@@ -19,10 +19,10 @@ const parseLineColorCode = (line) => {
     };
 
     const styleMap = {
-        '§l': 'font-weight: bold;',  // 粗体
-        '§m': 'text-decoration: line-through;',  // 删除线
-        '§n': 'text-decoration: underline;',  // 下划线
-        '§o': 'font-style: italic;',  // 斜体
+        '§l': 'font-weight: bold;',  // bold
+        '§m': 'text-decoration: line-through;',  // strikethrough
+        '§n': 'text-decoration: underline;',  // underline
+        '§o': 'font-style: italic;',  // italic
     };
 
     const resetCode = '§r';

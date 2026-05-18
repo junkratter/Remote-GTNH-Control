@@ -1,5 +1,5 @@
 <template>
-    <template v-if="formatType !== '简化' || !showTooltip">
+    <template v-if="formatType !== 'short' || !showTooltip">
         {{ formatNumber(number) }}
     </template>
     <template v-else>
@@ -12,6 +12,12 @@
 <script>
 import Setting from '@/utils/setting';
 
+// Backwards compat for users who saved the old Chinese values in localStorage.
+const LEGACY_FORMAT_MAP = {
+    '原始': 'original',
+    '千分': 'thousand',
+    '简化': 'short',
+};
 
 export default {
     props: {
@@ -30,17 +36,18 @@ export default {
         if (this.$root.formatType) {
             this.formatType = this.$root.formatType;
         } else {
-            this.formatType = Setting.get("numberFormatting");
+            const raw = Setting.get("numberFormatting");
+            this.formatType = LEGACY_FORMAT_MAP[raw] || raw || 'short';
             this.$root.formatType = this.formatType;
         }
     },
     methods: {
         formatNumber(number) {
-            if (this.formatType === "原始") {
+            if (this.formatType === "original") {
                 return number.toString();
-            } else if (this.formatType === "千分") {
+            } else if (this.formatType === "thousand") {
                 return number.toLocaleString();
-            } else if (this.formatType === "简化") {
+            } else if (this.formatType === "short") {
                 if (number < 10000) {
                     return number;
                 } else if (number < 1000000) {
@@ -53,9 +60,8 @@ export default {
                     this.showTooltip = true;
                     return Math.floor(number / 1000000000) + "G";
                 }
-            } else {
-                return number;
             }
+            return number;
         },
     },
 };

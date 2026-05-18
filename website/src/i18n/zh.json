@@ -1,0 +1,696 @@
+{
+  "app": {
+    "title": "GTNH 赛博监工",
+    "loading": "加载中..."
+  },
+  "home": {
+    "subtitle": "基于 OpenComputers 的 GTNH AE2 远程控制框架",
+    "repo": "仓库",
+    "author": "作者",
+    "mobile_hint": "完整功能在桌面端使用体验更佳。"
+  },
+  "common": {
+    "add": "新增",
+    "edit": "编辑",
+    "confirm": "确认",
+    "actions": "操作",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "refresh": "刷新",
+    "search": "搜索",
+    "yes": "是",
+    "no": "否",
+    "error": "错误",
+    "success": "成功",
+    "empty": "暂无数据",
+    "submit": "提交",
+    "details": "详情",
+    "remove": "移除",
+    "index": "序号",
+    "unknown": "未知",
+    "empty_response": "服务器返回空数据",
+    "unknown_error": "未知错误"
+  },
+  "error_display": {
+    "title": "数据加载失败",
+    "unknown": "未知错误",
+    "hint": "请在设置中检查后端地址与令牌。",
+    "refresh": "刷新页面"
+  },
+  "errors": {
+    "tasks": {
+      "set_backend": "请先在设置中填写后端地址！",
+      "bad_response": "服务器响应无效（请检查设置中的后端地址）。",
+      "missing_token": "请在设置中填写 Server Token（X-Server-Token）。",
+      "status_fail": "查询任务失败: {code} {detail}",
+      "status_catch": "查询任务失败: {detail}",
+      "submit_fail": "提交任务失败: {code} {detail}",
+      "submit_catch": "提交任务失败: {detail}",
+      "submit_no_id": "提交任务失败: task_id 为空",
+      "refresh_cpu": "刷新CPU失败: {detail}"
+    },
+    "history": {
+      "empty": "任务不存在或暂无历史数据",
+      "fail": "获取历史数据失败: {detail}",
+      "catch": "获取历史数据失败: {detail}"
+    },
+    "craft": {
+      "title": "下单",
+      "submitted": "下单请求已提交。详情请前往任务列表。task id: {taskId}",
+      "success": "下单成功。详情请前往任务列表。task id: {taskId}",
+      "failed": "下单失败{reason}。详情请前往任务列表。task id: {taskId}",
+      "reason_missing": "（材料缺失或CPU不足）",
+      "reason_unknown": "（未知错误）"
+    },
+    "automate": {
+      "http_error": "{action}：服务器返回 {code}。{detail}",
+      "http_throw": "{action}：{detail}",
+      "actions": {
+        "trigger_config": "获取触发器配置",
+        "trigger_add": "添加触发器",
+        "trigger_remove": "移除触发器",
+        "trigger_list": "获取触发器列表",
+        "trigger_start": "启动触发器",
+        "trigger_stop": "停止触发器",
+        "timer_config": "获取定时器配置",
+        "timer_add": "添加定时器",
+        "timer_remove": "移除定时器",
+        "timer_list": "获取定时器列表",
+        "timer_start": "启动定时器",
+        "timer_stop": "停止定时器",
+        "action_template": "获取操作模板"
+      }
+    }
+  },
+  "cpu": {
+    "busy": "繁忙",
+    "idle": "空闲",
+    "last_update": "最近更新",
+    "select": "请选择CPU",
+    "auto_alloc": "自动分配",
+    "get_info": "获取CPU信息",
+    "status": "状态",
+    "storage": "可存储",
+    "coprocessors": "并行",
+    "crafting": "正在合成",
+    "planned": "计划合成",
+    "stored": "现存",
+    "no_items": "没有物品",
+    "request_sent": "请求已发送，等待客户端响应… ({task})",
+    "refresh_success": "刷新CPU列表成功",
+    "refresh_failed": "刷新CPU失败 ({msg})"
+  },
+  "automateUi": {
+    "load_tasks_failed": "加载任务失败: {detail}",
+    "load_config_failed": "加载任务配置失败: {detail}",
+    "fill_condition_action": "请填写完整的触发条件和执行操作",
+    "pick_cpu": "请选择监听的CPU",
+    "interval_seconds": "请设置有效的检测间隔（至少1秒）",
+    "delay_min_60": "延迟时间至少需要60秒",
+    "pick_schedule_time": "请选择定时时间",
+    "schedule_future": "定时时间应该是未来的时间",
+    "pick_craft_item": "请选择合成物品",
+    "craft_amount_min": "请填写有效的合成数量（至少1个）",
+    "json_body_invalid": "请求体必须是有效的JSON格式",
+    "invalid_headers": "发现 {n} 个无效的请求头（键或值为空）",
+    "invalid_params": "发现 {n} 个无效的URL参数（键或值为空）",
+    "url_required": "请求地址不能为空",
+    "method_required": "请求方法不能为空",
+    "url_suspicious": "请求地址格式可能不正确，请确认",
+    "invalid_trigger": "无效的触发条件",
+    "adding_wait": "正在添加任务，请稍候...",
+    "task_added": "任务添加成功",
+    "template_fetch_warn": "获取模板数据失败",
+    "task_invalid": "任务数据无效",
+    "task_started": "任务启动成功",
+    "task_stopped": "任务停止成功",
+    "task_detail_unavailable": "无法显示任务详情",
+    "task_removed": "任务移除成功",
+    "template_invalid": "无效的模板",
+    "template_applied": "模板应用成功",
+    "template_apply_failed": "应用模板失败"
+  },
+  "tasks": {
+    "last_update": "最近更新时间",
+    "add_monitor": "添加任务监控",
+    "refresh_list": "刷新任务列表",
+    "task_id": "任务ID",
+    "type": "类型",
+    "created_time": "创建时间",
+    "executed_time": "执行时间",
+    "completed_time": "完成时间",
+    "status_col": "状态",
+    "details": "任务详情",
+    "click_for_details": "点击查看详情",
+    "load_failed": "加载任务失败",
+    "fetch_status_failed": "任务 {id} 获取状态失败",
+    "prompt_id": "请输入任务ID",
+    "submit_task": "提交任务",
+    "bad_id": "错误的任务ID",
+    "empty_id": "任务ID为空",
+    "custom_kind": "自定义",
+    "added_success": "任务已经成功添加进列表",
+    "status": {
+      "ready": "等待请求中",
+      "pending": "等待响应中",
+      "completed": "已完成",
+      "unknown": "未知"
+    }
+  },
+  "info": {
+    "gtnh_version": "GTNH版本",
+    "web_version": "Web版本",
+    "backend_version": "后端版本",
+    "oc_clients": "OC客户端",
+    "clients_count": "{n} 台 (点击查看详情)",
+    "source_code": "开源地址",
+    "issues": "问题反馈",
+    "api_docs": "接口文档",
+    "license": "许可信息",
+    "client_dialog_title": "客户端信息",
+    "client_id": "客户端id",
+    "last_active": "最后活跃时间",
+    "backend_not_configured": "后端地址未配置",
+    "fetch_meta_failed": "获取后端信息失败 ({code}): {msg}",
+    "fetch_clients_failed": "获取客户端信息失败 ({code}): {msg}"
+  },
+  "items": {
+    "search_placeholder": "请输入信息以查询",
+    "search_type": "查询类型",
+    "title_field": "物品名",
+    "label_field": "标签名",
+    "get": "获取物品信息",
+    "amount": "数量",
+    "craftable_tag": "可合成",
+    "stored": "存储物品",
+    "other_props": "其他属性",
+    "click_copy": "点击复制属性值",
+    "craft_action": "下单制作",
+    "last_update": "最近更新时间",
+    "total_count": "共 {n} 条",
+    "craft_amount": "下单数量",
+    "amount_placeholder": "请输入下单数量",
+    "select_cpu": "选择CPU",
+    "fetch_cpus_first": "请先获取CPU列表",
+    "cpu_only_named_idle": "仅能选择已命名且空闲的CPU",
+    "get_cpu": "获取CPU",
+    "craft_dialog_title": "下单",
+    "craft_dialog_with_name": "下单-{name}",
+    "uploading": "客户端正在上传数据，请稍后… ({task})",
+    "request_sent": "请求已发送，等待客户端响应… ({task})",
+    "copy_success": "复制成功!",
+    "copy_failed": "复制失败",
+    "refresh_success": "获取物品列表成功!",
+    "filter": {
+      "all": "全部",
+      "craftable": "可下单",
+      "items": "物品",
+      "fluids": "液体"
+    }
+  },
+  "monitor": {
+    "eu_stored": "兰波顿存储电量",
+    "wireless_eu": "无线电网电量",
+    "wireless_eu_tooltip": "该信息来源为兰波顿电容",
+    "no_history": "暂无历史数据",
+    "parse_failed": "数据解析失败",
+    "vs_previous": "相较于上一次数据",
+    "trend": {
+      "title": "历史趋势",
+      "units_heading": "数字单位说明：",
+      "unit_k": "K = 千 (10³)",
+      "unit_m": "M = 百万 (10⁶)",
+      "unit_g": "G = 十亿 (10⁹)",
+      "unit_t": "T = 万亿 (10¹²)",
+      "unit_p": "P = 千万亿 (10¹⁵)",
+      "unit_e": "E = 百京 (10¹⁸)",
+      "unit_z": "Z = 十垓 (10²¹)",
+      "unit_y": "Y = 千穰 (10²⁴)",
+      "time_range": "时间范围",
+      "granularity": "时间粒度",
+      "range_1h": "近1小时",
+      "range_4h": "近4小时",
+      "range_12h": "近12小时",
+      "range_24h": "近1天",
+      "range_72h": "近3天",
+      "range_168h": "近7天",
+      "range_custom": "自定义",
+      "granularity_none": "无",
+      "granularity_1h": "1小时平均",
+      "date_range_to": "至",
+      "start_time": "开始时间",
+      "end_time": "结束时间",
+      "empty": "暂无数据",
+      "shortcut_last_1d": "最近1天",
+      "shortcut_last_3d": "最近3天",
+      "shortcut_last_7d": "最近7天",
+      "stats_max": "最大",
+      "stats_min": "最小",
+      "stats_avg": "平均",
+      "stats_line": "最大: {max}  最小: {min}  平均: {avg}"
+    }
+  },
+  "automate_page": {
+    "last_update": "最近更新时间",
+    "add_task": "添加自动化任务",
+    "refresh": "刷新任务列表",
+    "col_index": "序号",
+    "col_id": "ID",
+    "col_type": "类型",
+    "col_trigger": "触发条件",
+    "col_action": "执行操作",
+    "col_status": "状态",
+    "col_ops": "操作",
+    "detail_btn": "详情",
+    "remove_btn": "移除",
+    "start": "启动",
+    "stop": "停止",
+    "types": { "trigger": "触发器", "timer": "定时器" },
+    "group": { "trigger": "触发器", "timer": "定时器" },
+    "names": {
+      "cpu_idle": "CPU空闲时",
+      "delay_timer": "延迟任务",
+      "scheduled_timer": "定时任务"
+    },
+    "trigger_desc": {
+      "cpu_idle": "当指定的合成 CPU 变为空闲时。"
+    },
+    "timer_desc": {
+      "delay_timer": "创建后延迟 N 秒执行一次。",
+      "scheduled_timer": "在指定日期时间执行一次。"
+    },
+    "action_kind": {
+      "craft": "合成物品",
+      "http_request": "HTTP 请求"
+    },
+    "loading": "加载中…",
+    "detail_title": "自动化任务详情",
+    "add_title": "添加自动化任务",
+    "basic_info": "基本信息",
+    "lifecycle": "生命周期",
+    "interval_sec": "检测间隔",
+    "sec": "秒",
+    "timeline_created": "任务创建",
+    "timeline_start": "上一次启动",
+    "timeline_monitor": "最近检测",
+    "timeline_execute": "执行操作",
+    "timeline_execute_est": "(预计)",
+    "timeline_done": "任务完成",
+    "trigger_section": "触发条件",
+    "action_section": "执行操作",
+    "craft_target": "合成目标",
+    "result": "执行结果",
+    "none": "无",
+    "form_trigger": "触发条件",
+    "form_trigger_ph": "请选择触发条件",
+    "watch_cpu": "监听CPU",
+    "cpu_busy_footer": "仅能选择已命名且繁忙的CPU",
+    "client_id": "客户端ID",
+    "client_id_tip": "不指定则留空",
+    "client_id_ph": "请输入客户端ID",
+    "poll_interval": "检测间隔",
+    "delay_label": "延迟时间",
+    "delay_ph": "延迟",
+    "schedule_label": "定时时间",
+    "schedule_ph": "选择执行时间",
+    "form_action": "执行操作",
+    "form_action_ph": "请选择执行操作",
+    "target_item": "目标物品",
+    "fluid_search_footer": "流体不支持中文搜索",
+    "craft_qty": "合成数量",
+    "craft_qty_ph": "合成数量",
+    "unit_count": "个",
+    "cpu_optional": "指定CPU",
+    "cpu_busy_tip": "如果请求合成时CPU繁忙，则合成失败",
+    "http_method": "请求方法",
+    "http_method_ph": "请选择请求方法",
+    "http_url": "请求地址",
+    "http_url_ph": "请输入请求地址",
+    "http_headers": "请求头",
+    "http_params": "请求参数",
+    "http_body": "请求体",
+    "key_ph": "请输入key",
+    "value_ph": "请输入value",
+    "remove_row": "删除",
+    "add_row": "添加",
+    "use_template": "使用模板",
+    "add_btn": "添加",
+    "template_title": "使用模板",
+    "template_col_name": "名称",
+    "template_col_desc": "描述",
+    "template_use": "使用",
+    "status": { "ready": "就绪", "pending": "运行中", "completed": "已完成" },
+    "errors": {
+      "backend_url": "请在设置中配置后端地址",
+      "trigger_list": "获取触发器列表失败",
+      "timer_list": "获取定时器列表失败",
+      "load_tasks": "加载任务失败",
+      "incomplete_form": "请填写完整的触发条件和执行操作",
+      "pick_cpu": "请选择监听的CPU",
+      "interval_min": "请设置有效的检测间隔（至少1秒）",
+      "delay_min": "延迟时间至少需要60秒",
+      "pick_time": "请选择定时时间",
+      "future_time": "定时时间应该是未来的时间",
+      "pick_item": "请选择合成物品",
+      "qty_min": "请填写有效的合成数量（至少1个）",
+      "invalid_json": "请求体必须是有效的JSON格式",
+      "invalid_headers": "发现 {n} 个无效的请求头（键或值为空）",
+      "invalid_params": "发现 {n} 个无效的URL参数（键或值为空）",
+      "url_required": "请求地址不能为空",
+      "method_required": "请求方法不能为空",
+      "url_warn": "请求地址格式可能不正确，请确认",
+      "invalid_trigger": "无效的触发条件",
+      "adding": "正在添加任务，请稍候...",
+      "trigger_cfg": "无法获取触发器配置",
+      "timer_cfg": "无法获取定时器配置",
+      "load_cfg": "加载任务配置失败",
+      "templates_fail": "获取模板数据失败",
+      "invalid_task": "任务数据无效",
+      "invalid_template": "无效的模板",
+      "detail_fail": "无法显示任务详情"
+    },
+    "success": {
+      "added": "任务添加成功",
+      "started": "任务启动成功",
+      "stopped": "任务停止成功",
+      "removed": "任务移除成功"
+    }
+  },
+  "menu": {
+    "home": "主页",
+    "monitor": "监控",
+    "items": "终端",
+    "cpus": "CPU",
+    "tasks": "任务",
+    "automate": "自动化",
+    "robots": "机器人",
+    "autocraft": "自动合成",
+    "map": "地图",
+    "quests": "任务书",
+    "wiki": "百科",
+    "settings": "设置",
+    "info": "信息"
+  },
+  "lang": {
+    "switch": "语言",
+    "ru": "Русский",
+    "en": "English",
+    "zh": "中文"
+  },
+  "robots": {
+    "tabs": {
+      "registry": "设备",
+      "mining": "采矿任务",
+      "power": "发电机 / 涡轮"
+    },
+    "hint": "OC 插件：robot_crop、robot_miner、robot_power（发电机与燃料胶囊）。通过 /api/task/add 下发。详见 kb/03-gtnh/gt-power-deploy.md。",
+    "register": {
+      "client_id": "客户端 ID",
+      "client_ph": "如 robot_crop_01",
+      "kind": "角色",
+      "label": "备注",
+      "label_ph": "可选",
+      "submit": "注册 / 更新",
+      "need_id": "请填写客户端 ID",
+      "presets": "快捷",
+      "preset_ae": "示例: client_01 (AE)",
+      "preset_miner": "示例: robot_miner_01"
+    },
+    "actions": {
+      "harvest": "排队 harvestBelow",
+      "ping": "排队矿工 ping",
+      "power_ping": "发电机 ping",
+      "task_queued": "任务已排队 — 请在「任务」页查看"
+    },
+    "power": {
+      "robot_client": "机器人客户端 ID",
+      "robot_ph": "robot_miner_01",
+      "generator_kind": "发电机类型",
+      "fuel_kind": "燃料",
+      "capsule_count": "胶囊次数",
+      "create": "创建任务",
+      "queue_deploy": "排队部署",
+      "need_robot": "请填写机器人客户端 ID"
+    },
+    "mining": {
+      "robot_client": "机器人客户端 ID",
+      "robot_ph": "robot_miner_01",
+      "miner_kind": "矿机类型",
+      "dimension": "维度",
+      "note": "备注",
+      "create": "创建任务",
+      "coords": "坐标 XYZ",
+      "state": "任务状态",
+      "mark_running": "进行中",
+      "mark_done": "完成",
+      "queue_accept": "排队 accept",
+      "queue_deploy": "排队 deploy",
+      "queued_on_create": "任务已创建并已加入机器人队列（进行中）",
+      "need_robot": "请填写机器人客户端 ID"
+    },
+    "list": {
+      "title": "机器人",
+      "empty": "尚未注册任何机器人",
+      "columns": {
+        "client_id": "客户端ID",
+        "kind": "类型",
+        "state": "状态",
+        "last_message": "消息"
+      }
+    },
+    "kind": {
+      "ae": "ME / AE2 (client_01)",
+      "crop": "作物农夫",
+      "miner": "矿工",
+      "power": "发电（发电机）",
+      "scanner": "扫描者",
+      "generic": "通用"
+    },
+    "state": {
+      "idle": "空闲",
+      "moving": "移动中",
+      "working": "工作中",
+      "unloading": "卸货",
+      "returning": "返回中",
+      "error": "错误"
+    }
+  },
+  "autocraft": {
+    "title": "自动合成",
+    "patterns": {
+      "title": "AE2 样板",
+      "empty": "暂未配置样板",
+      "add": "新增样板",
+      "edit": "编辑样板",
+      "program": "写入样板",
+      "program_prompt": "用于编写样板的 OC 客户端 ID：",
+      "confirm_delete": "删除样板 #{id}？",
+      "col_label": "描述",
+      "col_iface": "ME 接口",
+      "col_kind": "类型",
+      "col_id": "ID",
+      "col_slot": "槽位",
+      "kind_processing": "处理",
+      "kind_crafting": "有序合成",
+      "field": {
+        "label": "描述",
+        "iface": "ME 接口地址",
+        "slot": "槽位",
+        "kind": "样板类型",
+        "inputs": "输入",
+        "outputs": "输出"
+      }
+    },
+    "requests": {
+      "title": "合成队列",
+      "empty": "暂无合成请求",
+      "request_item": "请求物品",
+      "submit": "提交",
+      "col_item": "物品",
+      "col_amount": "数量",
+      "col_cpu": "CPU",
+      "col_state": "状态",
+      "col_id": "ID",
+      "col_client": "客户端",
+      "state": {
+        "queued": "排队",
+        "cancelling": "取消中",
+        "done": "完成",
+        "failed": "失败"
+      },
+      "field": {
+        "client": "客户端 ID",
+        "item": "物品 internal name",
+        "damage": "Damage",
+        "amount": "数量",
+        "cpu": "CPU 名称 (可选)"
+      }
+    },
+    "cpus": {
+      "scan": "扫描 CPU",
+      "detail": "包含 CPU 详细信息"
+    },
+    "item": {
+      "name": "名称",
+      "damage": "dmg",
+      "amount": "数量"
+    },
+    "wiki": {
+      "fill_from": "从百科(NESQL)填充",
+      "dialog_title": "NESQL 配方",
+      "search_ph": "搜索物品…",
+      "search_btn": "搜索",
+      "recipes_for": "产出此物品的配方",
+      "apply": "应用到输入/输出",
+      "hint": "需已导入 NESQL；ME 需连接对应机器类型。",
+      "no_items": "无结果",
+      "no_recipes": "无配方",
+      "skipped_fluids": "已跳过纯流体格子（必要时请手动填写）",
+      "back": "返回物品列表",
+      "recipe_line": "{type} · {eu} EU/t · {ticks} tick"
+    }
+  },
+  "map": {
+    "title": "世界地图",
+    "empty": "尚未扫描",
+    "dimension": "维度",
+    "refresh": "刷新",
+    "filters": {
+      "ore": "矿石",
+      "fluid": "液体",
+      "all": "全部"
+    },
+    "settings_hint": "地图中心在「设置」中配置。"
+  },
+  "quests": {
+    "title": "GTNH 任务",
+    "empty": "尚未导入 NESQL 数据",
+    "refresh": "刷新",
+    "search_ph": "搜索任务（至少 2 个字符）…",
+    "search_btn": "搜索",
+    "search_hint": "对已导入的 NESQL 数据调用 /api/quests/search。",
+    "col_line": "任务线",
+    "back_tree": "完整树",
+    "detail_title": "任务",
+    "tasks": "任务目标",
+    "rewards": "奖励",
+    "view_board": "任务书",
+    "view_tree": "树形",
+    "select_line": "任务章节",
+    "board": {
+      "completion": "完成：{done}/{total}",
+      "empty_line": "本章没有任务（请检查 NESQL 导入）。",
+      "auto_layout": "布局按依赖关系自动生成（不强制要求 NESQL 中的 BQ 坐标）。"
+    }
+  },
+  "wiki": {
+    "title": "百科 (NESQL)",
+    "search_placeholder": "搜索物品...",
+    "meta": {
+      "unavailable": "尚未导入 NESQL 数据。参见 tools/nesql-import/。",
+      "imported": "{count} 项，数据库 {size}"
+    },
+    "filter": {
+      "mod_all": "全部模组"
+    },
+    "col": {
+      "name": "名称",
+      "internal": "内部 ID",
+      "mod": "模组",
+      "damage": "Damage",
+      "stack": "堆叠"
+    },
+    "detail": {
+      "title": "物品",
+      "oredict": "矿物词典",
+      "aspects": "神秘要素",
+      "recipes_out": "产出该物品的配方",
+      "recipe_type": "类型",
+      "duration": "Tick",
+      "empty": "无",
+      "recipe_click": "点击一行查看配方布局。"
+    },
+    "recipe": {
+      "machine": "机器",
+      "inputs": "输入",
+      "outputs": "输出",
+      "fluid": "流体",
+      "ticks": "{n} tick",
+      "eu": "{n} EU/t"
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "alert": "该页面内容请勿泄露给他人，所有配置信息将保存至本地 (localStorage)",
+    "confirm_reload": "是否刷新网页以应用更改？",
+    "dark_mode": "暗色模式",
+    "language": "界面语言",
+    "section": {
+      "backend": "后端设置",
+      "basic": "基础设置",
+      "map": "世界地图",
+      "other": "其他设置"
+    },
+    "fields": {
+      "backendUrl": {
+        "label": "服务端地址",
+        "placeholder": "留空=同主机（/api 代理）",
+        "tooltip": "若前端通过 /api 代理到后端可留空；否则填写后端地址，如 http://host:18856"
+      },
+      "token": {
+        "label": "服务端令牌",
+        "placeholder": "Token"
+      },
+      "pageTitle": {
+        "label": "页面标题",
+        "placeholder": "Title"
+      },
+      "numberFormatting": {
+        "label": "数字格式化"
+      },
+      "showMoniter": {
+        "label": "启用监控页面",
+        "tooltip": "选择此选项后，可以显示监控信息<br/>必须在OC客户端中启用并配置 moniter 插件！"
+      },
+      "showFluid": {
+        "label": "液滴显示流体图片"
+      },
+      "refreshCPU": {
+        "label": "下单后刷新CPU",
+        "tooltip": "选择此选项后，在下单结束会同时返回CPU信息（临时，刷新后清除）<br/>当需要频繁下单或CPU信息量较大时谨慎选择！"
+      },
+      "useTaskGzip": {
+        "label": "启用任务数据压缩",
+        "tooltip": "选择此选项后，返回压缩后的任务结果数据<br/>可能会增加计算负担<br/>当任务结果数据量较大时，建议开启此选项"
+      },
+      "useGzip": {
+        "label": "启用物品数据压缩",
+        "tooltip": "选择此选项后，会请求压缩后的物品数据文件（包含物品中文名等）<br/>可以大幅度减少请求时间，但可能会增加计算负担<br/>当你的代理服务器(例如nginx)启用了gzip压缩，请关闭此选项"
+      },
+      "resourceUrl": {
+        "label": "自定义数据源",
+        "placeholder": "数据文件的URL地址目录，用于加载物品数据"
+      },
+      "mapOriginX": {
+        "label": "地图中心 X (F3)",
+        "placeholder": "3220"
+      },
+      "mapOriginZ": {
+        "label": "地图中心 Z (F3)",
+        "placeholder": "-4900"
+      },
+      "mapDefaultDimension": {
+        "label": "默认维度",
+        "placeholder": "0"
+      }
+    },
+    "segments": {
+      "numberFormatting": {
+        "original": "原始",
+        "thousand": "千分",
+        "short": "简化"
+      }
+    }
+  }
+}

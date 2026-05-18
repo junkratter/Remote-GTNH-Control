@@ -658,7 +658,7 @@ nbt.parse = function (data, callback) {
 		}
 
 		try {
-			var uncompressed = zlib.ungzip(buffer);  // 直接返回解压缩后的数据
+			var uncompressed = zlib.ungzip(buffer);  // already uncompressed bytes
 			callback(null, self.parseUncompressed(uncompressed));
 		} catch (error) {
 			callback(error, null);
@@ -667,14 +667,13 @@ nbt.parse = function (data, callback) {
 }
 
 nbt.base64ToUint8Array = function(base64) {
-    // 使用 atob 解码 base64 字符串为二进制字符串
+    // atob → binary string
     let binaryString = atob(base64);
-    
-    // 创建 Uint8Array，长度等于解码后的字符串长度
+
     let len = binaryString.length;
     let bytes = new Uint8Array(len);
 
-    // 将二进制字符串的每个字符转换为 Uint8Array 中的字节值
+    // char codes → bytes
     for (let i = 0; i < len; i++) {
         bytes[i] = binaryString.charCodeAt(i);
     }

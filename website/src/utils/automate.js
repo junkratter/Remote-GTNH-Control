@@ -1,6 +1,25 @@
 import Requests from './requests';
-import { ElMessage, ElNotification } from 'element-plus';
+import { ElMessage } from 'element-plus';
+import { i18n } from '@/i18n';
 
+function t(key, params) {
+    return i18n.global.t(key, params);
+}
+
+function automateErr(actionKey, data, error) {
+    const action = t(`errors.automate.actions.${actionKey}`);
+    if (error) {
+        ElMessage.error(t('errors.automate.http_throw', { action, detail: String(error) }));
+        return;
+    }
+    ElMessage.error(
+        t('errors.automate.http_error', {
+            action,
+            code: data.code,
+            detail: data.message ? data.message : JSON.stringify(data),
+        }),
+    );
+}
 
 const trigger = {
     async getTriggerConfig(callback) {
@@ -10,11 +29,11 @@ const trigger = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`获取触发器配置失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('trigger_config', data, null);
                 console.error(data);
             }
         } catch (error) {
-            ElMessage.error(`获取触发器配置失败: ${error}`);
+            automateErr('trigger_config', null, error);
             console.error('Error fetching trigger config:', error);
         }
     },
@@ -25,10 +44,10 @@ const trigger = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`添加触发器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('trigger_add', data, null);
             }
         } catch (error) {
-            ElMessage.error(`添加触发器失败: ${error}`);
+            automateErr('trigger_add', null, error);
             console.error('Error adding trigger:', error);
         }
     },
@@ -39,10 +58,10 @@ const trigger = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`移除触发器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('trigger_remove', data, null);
             }
         } catch (error) {
-            ElMessage.error(`移除触发器失败: ${error}`);
+            automateErr('trigger_remove', null, error);
             console.error('Error removing trigger:', error);
         }
     },
@@ -53,11 +72,11 @@ const trigger = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`获取触发器列表失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('trigger_list', data, null);
                 console.error(data);
             }
         } catch (error) {
-            ElMessage.error(`获取触发器列表失败: ${error}`);
+            automateErr('trigger_list', null, error);
             console.error('Error fetching trigger list:', error);
         }
     },
@@ -68,10 +87,10 @@ const trigger = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`启动触发器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('trigger_start', data, null);
             }
         } catch (error) {
-            ElMessage.error(`启动触发器失败: ${error}`);
+            automateErr('trigger_start', null, error);
             console.error('Error starting trigger:', error);
         }
     },
@@ -82,14 +101,14 @@ const trigger = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`停止触发器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('trigger_stop', data, null);
             }
         } catch (error) {
-            ElMessage.error(`停止触发器失败: ${error}`);
+            automateErr('trigger_stop', null, error);
             console.error('Error stopping trigger:', error);
         }
-    }
-}
+    },
+};
 
 const timer = {
     async getTimerConfig(callback) {
@@ -99,11 +118,11 @@ const timer = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`获取定时器配置失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('timer_config', data, null);
                 console.error(data);
             }
         } catch (error) {
-            ElMessage.error(`获取定时器配置失败: ${error}`);
+            automateErr('timer_config', null, error);
             console.error('Error fetching timer config:', error);
         }
     },
@@ -114,10 +133,10 @@ const timer = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`添加定时器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('timer_add', data, null);
             }
         } catch (error) {
-            ElMessage.error(`添加定时器失败: ${error}`);
+            automateErr('timer_add', null, error);
             console.error('Error adding timer:', error);
         }
     },
@@ -128,10 +147,10 @@ const timer = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`移除定时器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('timer_remove', data, null);
             }
         } catch (error) {
-            ElMessage.error(`移除定时器失败: ${error}`);
+            automateErr('timer_remove', null, error);
             console.error('Error removing timer:', error);
         }
     },
@@ -142,11 +161,11 @@ const timer = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`获取定时器列表失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('timer_list', data, null);
                 console.error(data);
             }
         } catch (error) {
-            ElMessage.error(`获取定时器列表失败: ${error}`);
+            automateErr('timer_list', null, error);
             console.error('Error fetching timer list:', error);
         }
     },
@@ -157,10 +176,10 @@ const timer = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`启动定时器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('timer_start', data, null);
             }
         } catch (error) {
-            ElMessage.error(`启动定时器失败: ${error}`);
+            automateErr('timer_start', null, error);
             console.error('Error starting timer:', error);
         }
     },
@@ -171,14 +190,14 @@ const timer = {
             if (data.code === 200) {
                 if (callback) callback(data.data);
             } else {
-                ElMessage.error(`停止定时器失败: ${data.code}, ${data.message ? data.message : data}`);
+                automateErr('timer_stop', data, null);
             }
         } catch (error) {
-            ElMessage.error(`停止定时器失败: ${error}`);
+            automateErr('timer_stop', null, error);
             console.error('Error stopping timer:', error);
         }
-    }
-}
+    },
+};
 
 const getActionTemplats = async (callback) => {
     try {
@@ -187,18 +206,13 @@ const getActionTemplats = async (callback) => {
         if (data.code === 200) {
             if (callback) callback(data.data);
         } else {
-            ElMessage.error(`获取操作模板失败: ${data.code}, ${data.message ? data.message : data}`);
+            automateErr('action_template', data, null);
             console.error(data);
         }
     } catch (error) {
-        ElMessage.error(`获取操作模板失败: ${error}`);
+        automateErr('action_template', null, error);
         console.error('Error fetching action templates:', error);
     }
-}
-
-
-export {
-    trigger,
-    timer,
-    getActionTemplats
 };
+
+export { trigger, timer, getActionTemplats };

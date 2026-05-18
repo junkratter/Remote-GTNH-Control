@@ -3,11 +3,11 @@
         <el-header class="control-header-task">
             <el-card class="control-card" shadow="hover">
                 <div class="control-bar">
-                    <span>最近更新时间: {{ lastUpdate }}</span>
+                    <span>{{ $t('tasks.last_update') }}: {{ lastUpdate }}</span>
                     <div style="text-align: right;">
                         <el-button type="primary" :size="isMobile ? 'small' : ''"
-                            @click="openTaskMessageBox">添加任务监控</el-button>
-                        <el-button type="primary" :size="isMobile ? 'small' : ''" @click="loadTasks">刷新任务列表</el-button>
+                            @click="openTaskMessageBox">{{ $t('tasks.add_monitor') }}</el-button>
+                        <el-button type="primary" :size="isMobile ? 'small' : ''" @click="loadTasks">{{ $t('tasks.refresh_list') }}</el-button>
                     </div>
                 </div>
             </el-card>
@@ -15,27 +15,27 @@
         <el-main style="width: 100%; overflow: hidden;" v-loading="mainLoading" element-loading-text="loading">
             <el-card class="table-box-card">
                 <el-table :data="tasks" border class="task-table">
-                    <el-table-column prop="taskId" label="任务ID" width="350" align="center"></el-table-column>
-                    <el-table-column prop="type" label="类型" width="100" align="center"></el-table-column>
-                    <el-table-column prop="data.created_time" label="创建时间" min-width="250"
+                    <el-table-column prop="taskId" :label="$t('tasks.task_id')" width="350" align="center"></el-table-column>
+                    <el-table-column prop="type" :label="$t('tasks.type')" width="100" align="center"></el-table-column>
+                    <el-table-column prop="data.created_time" :label="$t('tasks.created_time')" min-width="250"
                         align="center"></el-table-column>
-                    <el-table-column prop="data.pending_time" label="执行时间" min-width="250"
+                    <el-table-column prop="data.pending_time" :label="$t('tasks.executed_time')" min-width="250"
                         align="center"></el-table-column>
-                    <el-table-column prop="data.completed_time" label="完成时间" min-width="250"
+                    <el-table-column prop="data.completed_time" :label="$t('tasks.completed_time')" min-width="250"
                         align="center"></el-table-column>
-                    <el-table-column prop="data.status" label="状态" min-width="100" align="center"></el-table-column>
-                    <el-table-column label="操作" width="150" align="center" fixed="right">
+                    <el-table-column prop="data.status" :label="$t('tasks.status_col')" min-width="100" align="center"></el-table-column>
+                    <el-table-column :label="$t('common.actions')" width="150" align="center" fixed="right">
                         <template #default="{ row }">
-                            <el-button @click="handleInfo(row)" size="small">详情</el-button>
-                            <el-button @click="handleRemove(row)" size="small" type="danger">移除</el-button>
+                            <el-button @click="handleInfo(row)" size="small">{{ $t('common.details') }}</el-button>
+                            <el-button @click="handleRemove(row)" size="small" type="danger">{{ $t('common.remove') }}</el-button>
                         </template>
                     </el-table-column>
 
                 </el-table>
             </el-card>
         </el-main>
-        <el-dialog v-model="showInfoDialog" title="任务详情" width="800" align-center>
-            <el-text>任务ID: <span>{{ info.id }}</span></el-text>
+        <el-dialog v-model="showInfoDialog" :title="$t('tasks.details')" width="800" align-center>
+            <el-text>{{ $t('tasks.task_id') }}: <span>{{ info.id }}</span></el-text>
             <div class="info-container">
                 <code>
             <pre>{{ info.data }}</pre>
@@ -91,7 +91,7 @@ export default {
                 }
             } catch (error) {
                 console.error(error);
-                this.$message.error('加载任务失败');
+                this.$message.error(this.$t('tasks.load_failed'));
             } finally {
                 this.mainLoading = false;
             }
@@ -101,7 +101,7 @@ export default {
                 if (status !== "completed") await fetchStatus(taskId, this.handleTaskResult, null, null, 1000, null);
             } catch (error) {
                 console.error(error);
-                this.$message.error(`任务 ${taskId} 获取状态失败`);
+                this.$message.error(this.$t('tasks.fetch_status_failed', { id: taskId }));
             }
         },
         handleTaskResult(data) {
@@ -114,23 +114,23 @@ export default {
             }
         },
         openTaskMessageBox() {
-            ElMessageBox.prompt('请输入任务ID', '提交任务', {
-                confirmButtonText: '提交',
-                cancelButtonText: '取消',
-                inputErrorMessage: '错误的任务ID',
+            ElMessageBox.prompt(this.$t('tasks.prompt_id'), this.$t('tasks.submit_task'), {
+                confirmButtonText: this.$t('common.submit'),
+                cancelButtonText: this.$t('common.cancel'),
+                inputErrorMessage: this.$t('tasks.bad_id'),
             })
                 .then(({ value }) => {
                     if (!value) {
                         ElMessage({
                             type: 'warning',
-                            message: `任务ID为空`,
+                            message: this.$t('tasks.empty_id'),
                         })
                         return
                     }
-                    localTask.saveTaskId(value, '自定义', null)
+                    localTask.saveTaskId(value, this.$t('tasks.custom_kind'), null)
                     ElMessage({
                         type: 'success',
-                        message: `任务已经成功添加进列表`,
+                        message: this.$t('tasks.added_success'),
                     })
                     this.loadTasks();
                 })

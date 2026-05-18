@@ -1,362 +1,339 @@
+# gtnh-cyber
 
-<p align="center">
-  <img src="assets/gtnh.png" width="200" height="200" alt="gtnh">
-  <img src="assets/oc.png" width="200" height="200" alt="oc">
-</p>
+**GTNH Cyber Supervisor** — remote monitoring and control for **Applied Energistics 2** in **GregTech: New Horizons** via **OpenComputers** and a web UI.
 
-<h1 align="center" style="font-size: 38px;">赛博监工</h1>
-<h3 align="center">AE2 Control for GTNH 2.8.0</h3>
+**English** · [Русский](README.ru.md)
 
+Fork and extension of [RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2) (upstream [RemoteOC](https://github.com/z5882852/RemoteOC)). You need a host reachable from the game network (LAN or public) for the API/UI, and one or more OC computers as clients.
 
-## 简介
+---
 
-该项目是一个基于[OpenComputers](https://github.com/MightyPirates/OpenComputers)的GTNH-AE2的远程控制系统，主要用于监控AE2网络、物品、流体、CPU、任务等信息，以及支持远程下单、查看任务等功能。
+## Architecture
 
-
-该项目基于[RemoteOC](https://github.com/z5882852/RemoteOC)框架开发，需要一台**可公网访问的主机**作为服务器，以及一台或多台OpenComputers电脑作为客户端。
-
-
-## 功能
-
-- 支持查看AE2网络内的物品、流体信息
-- 支持查看CPU状态
-- 支持远程下单
-- 支持自动化流程
-- 支持监控兰波顿电容的电量和无线电网电量（需配置）
-- 支持监控波顿电容的电量和无线电网电量历史趋势（需配置）
-
-
-## 特色
-
-- 支持多个OC客户端
-- 移动端适配
-- 支持自定义任务
-- 暗色模式
-- 高度可定制化
-
-
-## 安装
-
-### 项目目录
-
-```shell
-client/    # OC客户端
-server/    # 服务端
-website/   # 网页前端
+```text
+Browser (Vue 3 SPA) ──HTTP──▶ FastAPI monolith ◀── long-poll ── OpenComputers (Lua)
+                                      │
+                                      └── SQLite (tasks, robots, map, autocraft, …)
+                                      └── nesql.sqlite (Wiki / quests / recipe lookup)
 ```
 
-### 使用 Docker 一键部署前后端
+OpenComputers can only make **outgoing** HTTP requests → the backend is a **single monolith** with one task queue for all modules. There is no server push to OC.
 
-1. **准备工作**
+---
 
-    - 安装`Docker`和`Docker Compose`
-    - 下载仓库中的`docker-compose.yml`和`server/.env`文件
+## Features
 
-2. **修改配置**
+### From upstream RemoteOC
 
-    - 根据想要修改`docker-compose.yml`文件中的环境变量
-    - 修改`.env`文件中的环境变量
+| Area | Description |
+|------|-------------|
+| **AE2 network** | View items, fluids, essentia; CPU list and status |
+| **Remote craft** | Order crafts from the web UI (`ae.requestItem`) |
+| **Automation** | Triggers and timers (`/api/automate/*`, `config.py` tasks) |
+| **Multi-client** | Several OC `clientId` values on one backend |
+| **UI** | Dark theme, mobile layout, configurable backend URL and token |
 
-3. **启动服务**
+### Added in gtnh-cyber
 
-    ```bash
-    docker-compose up -d
-    ```
-    > 默认前端端口为`80`，可直接访问，后端端口为`8080`，可在`docker-compose.yml`中修改
-  
-4. **查看日志**
+| Area | Description |
+|------|-------------|
+| **Autocraft** | ME Interface pattern programming (`setInterfacePattern*`), craft queue, status sync after OC reports — [`/api/autocraft/*`](server/app/modules/autocraft/), UI **Autocraft** |
+| **Robots** | Registry (`/api/robots/*`), mining jobs with OC enqueue, power-generator deploy — plugins `robot_crop`, `robot_miner`, `robot_power` |
+| **World map** | `POST /api/map/scan`, Leaflet page — plugin `geolyzer_map` |
+| **Quests** | Better Questing board from NESQL — `/api/quests/*` |
+| **Wiki** | Read-only item/recipe browser — `/api/nesql/*` |
+| **i18n** | Web UI: **en / ru / zh** (vue-i18n + Element Plus) |
+| **Persistence** | Docker volume `gtnh_cyber_data` for SQLite; deploy/backup scripts |
+| **Tests** | pytest integration + `/api/task/*` contract tests |
 
-    ```bash
-    docker-compose logs -f
-    ```
+---
 
-5. **停止服务**
+## Repository layout
 
-    ```bash
-    docker-compose down
-    ```
+```text
+gtnh-cyber/
+├── server/              FastAPI, SQLAlchemy 2, Alembic, SQLite
+├── website/             Vue 3, Element Plus, Vite, vue-i18n
+├── oc-client/           Lua client + plugins (see oc-client/README.md)
+├── tools/
+│   ├── kb-fetch/        Refresh kb/ excerpts from wikis
+│   ├── nesql-import/    HSQLDB (in-game export) → nesql.sqlite
+│   └── deploy/          Docker bootstrap, backup, robot seed
+├── kb/                  Knowledge base, ADR, OC/GTNH guides
+├── docker-compose.yml
+└── Makefile
+```
 
-### 手动构建后端 Docker 镜像
+---
 
+## Requirements
 
-1. **准备工作**
+| Component | Version |
+|-----------|---------|
+| Backend | Python **3.11** (`server/Dockerfile`) |
+| Frontend | Node **18+**, npm |
+| Docker (optional) | Docker Compose v2 |
+| OC client (in-game) | OpenComputers **1.11.x** (GTNH), Internet Card, ME adapter |
+| NESQL (optional) | Java JDK for `tools/nesql-import`, [nesql-exporter](https://github.com/GTNewHorizons/nesql-exporter) mod in the client |
 
-    - 安装 `Docker`
+---
 
-2. **克隆源码**
+## Quick start (Docker)
 
-   - 使用 Git 克隆项目到本地：
-     ```bash
-     git clone https://github.com/z5882852/RemoteOC-GTNH-AE2.git
-     ```
-   - 进入项目目录：
-     ```bash
-     cd RemoteOC-GTNH-AE2/server
-     ```
+```bash
+git clone <your-fork-url> gtnh-cyber
+cd gtnh-cyber
+git submodule update --init --recursive   # optional: kb/05-vendored
 
-3. **构建镜像**
+cp .env.example .env
+# Edit SERVER_TOKEN (random secret, same everywhere below)
 
-    ```bash
-    docker build -t roc-gtnh-backend .
-    ```
+docker compose up -d --build
+```
 
-4. **运行容器**
+| Service | Default host port | In-container |
+|---------|-------------------|--------------|
+| Web UI | **8855** | nginx :80 (proxies `/api/` → backend) |
+| API | **8856** | uvicorn :1030 |
 
-    ```bash
-    docker run -d --name roc-gtnh-backend -p 8080:8080 roc-gtnh-backend
-    ```
+- UI: `http://<host>:8855`
+- API docs: `http://<host>:8856/docs`
 
-5. **查看日志**
+Override ports in `.env`: `FRONTEND_PORT_HOST`, `BACKEND_PORT_HOST`.
 
-    ```bash
-    docker logs -f roc-gtnh-backend
-    ```
+**Persistent data:** SQLite files live in Docker volume **`gtnh_cyber_data`** (survives image rebuilds). Mirror to the host for backups:
 
-### 服务器端
+```bash
+chmod +x tools/deploy/*.sh
+./tools/deploy/backup-data.sh    # → ./data/backend/
+```
 
-**服务器端需要安装在可公网访问的服务器上**
+See [`tools/deploy/README.md`](tools/deploy/README.md) for seed/restore and robot bootstrap.
 
-1. **准备工作**
+---
 
-    - 安装`Python3`和`pip`
+## Configuration
 
-2. **克隆源码**
-   - 使用 Git 克隆项目到本地：
-     ```bash
-     git clone https://github.com/z5882852/RemoteOC-GTNH-AE2.git
-     ```
-   - 进入项目目录：
-     ```bash
-     cd RemoteOC-GTNH-AE2/server
-     ```
+### Backend (`.env`)
 
-3. **安装依赖**
+Copy [`.env.example`](.env.example) → `.env`:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+| Variable | Purpose |
+|----------|---------|
+| `SERVER_TOKEN` | Shared secret; header `X-Server-Token` on API and SPA |
+| `LOG_LEVEL` | e.g. `INFO` |
+| `BACKEND_PORT_HOST` / `FRONTEND_PORT_HOST` | Host port mapping (optional) |
 
-4. **修改配置**
+Do **not** commit `.env` or `server/.env`.
 
-    - 根据需要修改`.env`文件中的环境变量
-    - 根据需要修改`config.py`文件中的配置
+### Web UI (browser)
 
-5. **运行服务**
+Open **Settings** in the SPA:
 
-    ```bash
-    python run.py
-    ```
+| Field | Typical value |
+|-------|----------------|
+| Backend URL | Leave **empty** when using the built-in nginx proxy on the same host (`:8855`); or `http://<host>:8856` |
+| Server token | Same as `SERVER_TOKEN` |
 
-    指定端口运行服务
-    ```bash
-    python run.py --port 8080
-    ```
+### OpenComputers (`oc-client/env.lua`)
 
-### OC客户端
+```bash
+cp oc-client/env.lua.example oc-client/env.lua
+```
 
-**OC客户端需要安装在游戏内的OC电脑上**
+| Field | Purpose |
+|-------|---------|
+| `baseUrl` | Backend root, e.g. `http://127.0.0.1:8856` on the MC host |
+| `clientId` | OC client id (e.g. `client_01` for AE) |
+| `serverToken` | Same as `SERVER_TOKEN` |
+| `aeAddress` | ME controller/interface UUID (AE clients only) |
 
+Do **not** commit `oc-client/env.lua`.
 
-1. **注意事项**
+**OC hardware (AE client):** T3 CPU/APU, enough RAM for your item count (see upstream README), Internet Card, adapter next to ME. Memory tips: upstream suggests scaling RAM when AE exceeds ~1000 item types.
 
-    配置要求: 
-    - CPU: `T3 CPU`或`T3 APU`
-    - 内存: `2 x T3.5内存` (推荐使用`T4服务器`安装`4 x T3.5内存`)
-    - 扩展卡: `因特网卡`
-    - 扩展: `适配器`
-    - 其他: 根据实际情况调整
+**Filtering rules:** private IPs are blocked by default in GTNH OC — allow your backend subnet in `OpenComputers.cfg`. See [`kb/02-opencomputers/filtering-rules.md`](kb/02-opencomputers/filtering-rules.md).
 
-    当AE终端物品种类超过1000种时请使用`4 x T3.5内存`，超过2000种时请使用`创造模式内存`，否则会内存溢出导致无法获取物品数据。
-    > 具体多少种没进行测试，能跑起来就行
+---
 
-2. **准备工作**
+## Local development
 
-    - 组装好 OC 电脑
-    - 安装 OpenOS 操作系统
-    - 安装因特网卡
-    - 连接适配器
-    - 将ME接口或ME控制器紧邻适配器
-    - 使用分析器获取ME接口或ME控制器的地址
+```bash
+make install                 # server venv + website npm + kb-fetch deps
+cp .env.example .env
 
-3. **安装程序安装**
+make backend                 # API on :1030 (foreground)
+make frontend                # Vite dev server (see website/package.json)
+```
 
-    - 下载安装程序
-    ```bash
-    wget https://raw.githubusercontent.com/z5882852/RemoteOC-GTNH-AE2/main/client/setup.lua
-    ```
+```bash
+make test                    # pytest + contract tests
+make openapi                 # regenerate website OpenAPI types after API changes
+make kb-update               # refresh kb/ wiki slices (tools/kb-fetch)
+```
 
-    - 安装客户端
-    ```bash
-    setup.lua
-    ```
+---
 
-4. **直接安装(当raw.githubusercontent.com无法访问时)**
+## OpenComputers client
 
-    - 下载或克隆项目至本地
-    - 将`client`目录内所有文件上传至你的 OC 电脑
+### Install
 
-5. **修改`env.lua`文件**
+| Method | Doc |
+|--------|-----|
+| Copy `oc-client/` to OC disk | [`kb/02-opencomputers/oc-client-install.md`](kb/02-opencomputers/oc-client-install.md) |
+| Crop / miner / power robots | [`kb/02-opencomputers/robots-setup.ru.md`](kb/02-opencomputers/robots-setup.ru.md) (RU, detailed) |
+| Power generators (GT) | [`kb/03-gtnh/gt-power-deploy.md`](kb/03-gtnh/gt-power-deploy.md) |
 
-    - 将`env.lua`中的`baseUrl`修改为你的后端地址
-    - 将`env.lua`中的`serverToken`修改为你的服务端令牌
-    - 将`env.lua`中的`address`修改为你的ME接口或ME控制器的地址
+### Run
 
-6. **选择扩展插件（可选）**
+```text
+cd /home/<your-oc-folder>
+lua run.lua
+lua run.lua --debug
+```
 
-    - 可选插件目录为`client/optional_plugins/{插件名}`
-    - 该目录下会有`lib`和`plugins`两个文件夹，分别对应插件依赖库和插件本体
-    - 将插件目录下的`lib`内的文件上传至`client/lib`目录
-    - 将插件目录下的`plugins`内的文件上传至`client/plugins`目录
-    - 根据插件的说明修改插件本体文件
+Plugins under `plugins/*.lua` load automatically (`ae`, `robot_crop`, `robot_miner`, `robot_power`, `geolyzer_map`, …).
 
+### Register robots (web)
 
-7. **运行客户端**
+**Robots** → **Registry**: set `client_id`, role (`ae`, `crop`, `miner`, `power`, …), label.  
+Or seed from JSON:
 
-    输入以下命令运行客户端
-    ```bash
-    run.lua
-    ```
+```bash
+cp tools/deploy/robots.seed.example.json tools/deploy/robots.seed.json
+# edit, then:
+export SERVER_TOKEN=...
+./tools/deploy/bootstrap-robots.sh
+```
 
-    DEBUG模式运行
-    ```bash
-    run.lua --debug
-    ```
+### Task API contract
 
+Do **not** change `/api/task/get`, `/api/task/report`, `/api/task/chunked_report`, or the `{ code, message, data }` envelope without:
 
-### 网页前端
+1. Updating `oc-client/src/executor.lua`
+2. Updating [`kb/01-architecture/api-contract.md`](kb/01-architecture/api-contract.md)
+3. Extending [`server/tests/contract/test_task_contract.py`](server/tests/contract/test_task_contract.py)
 
-#### **1. 使用 Releases 打包好的网页并部署**
-如果您希望快速部署前端，可直接使用打包好的文件，无需进行源码构建。
+---
 
-1. **下载 Releases 文件**
-   - 访问项目的 Releases 页面：[🔗 **GitHub Releases**](https://github.com/z5882852/RemoteOC-GTNH-AE2/releases)
-   - 下载最新版本的 `RemoteOC_frontend-x.x.x_GTNH-2.x.0.tar.gz` 文件（或类似文件名的构建包）。
+## Web application (pages)
 
-2. **上传到服务器**
-   - 将压缩包文件上传到您的服务器（如 Nginx、Apache、或者其他静态资源服务器）。
-   - 解压文件。
+| Route / area | Function |
+|--------------|----------|
+| **Items** | AE storage browser, remote craft dialog |
+| **CPUs** | Crafting CPU status |
+| **Tasks** | Named tasks (`getAllItems`, …) via `/api/task/task` |
+| **Automate** | Triggers and timers |
+| **Autocraft** | ME patterns + craft queue |
+| **Robots** | Registry, mining jobs, power jobs |
+| **Map** | Scanned blocks (geolyzer) |
+| **Quests** | Quest tree / board from NESQL |
+| **Wiki** | Items and recipes (NESQL) |
+| **Settings** | Backend URL, token, map origin, i18n |
 
-3. **配置服务器**
+Named AE tasks default to `client_id: client_01` in [`server/app/automation/config.py`](server/app/automation/config.py) — change to match your `env.lua`.
 
-4. **访问网页**
-   - 使用浏览器访问部署的域名。
+---
 
+## NESQL (Wiki, quests, autocraft picker)
 
-
-#### **3. 克隆源码并构建再部署**
-1. **环境要求**
-   - Node.js: 推荐版本 16.x 或以上
-   - npm 或 yarn: 用于安装依赖
-   - Git: 用于克隆项目
+### 1. Export in Minecraft (client)
 
-2. **克隆源码**
-   - 使用 Git 克隆项目到本地：
-     ```bash
-     git clone https://github.com/z5882852/RemoteOC-GTNH-AE2.git
-     ```
-   - 进入项目目录：
-     ```bash
-     cd RemoteOC-GTNH-AE2/website
-     ```
+Official mod: **[GTNewHorizons/nesql-exporter](https://github.com/GTNewHorizons/nesql-exporter)**.
 
-3. **安装依赖**
-   - 使用 npm：
-     ```bash
-     npm install
-     ```
-   - 或使用 yarn：
-     ```bash
-     yarn install
-     ```
+- Build **`NESQL-Exporter-<version>.jar`** + **`-deps.jar`** (`./gradlew build` → `build/libs/`, version in `gradle.properties`, e.g. **0.5.2**).
+- Install **only that pair** into the instance **`mods/`** (client; not dedicated server `mods/`).
+- In world: **`/nesql`** (optional subfolder name).
+- Output: `.minecraft/nesql/` (HSQLDB dump).
 
-4. **构建项目**
-   - 运行以下命令以生成静态文件：
-     ```bash
-     npm run build
-     ```
-   - 构建完成后，静态资源将位于 `dist/` 目录中。
+Details: [`kb/04-nesql/export-howto.md`](kb/04-nesql/export-howto.md).
 
-5. **部署静态资源**
-   - 将 `dist/` 文件夹中的文件上传到您的服务器（如 Nginx、Apache 或其他静态资源服务器）。
-   - 配置服务器。
-   - 重启服务器后，访问您的域名即可。
+### 2. Import into backend
 
+```bash
+cd tools/nesql-import
+pip install -r requirements.txt
 
-#### **4. 注意事项**
-- 由于项目是单页面应用程序（SPA），请确保服务器配置了路径重写规则（如 Nginx 中的 `try_files $uri /index.html`）。
+python import.py \
+  --src /path/to/nesql-db \
+  --dst /path/to/data/backend/nesql.sqlite \
+  --hsqldb-jar ./vendor/hsqldb-2.7.4.jar
+```
 
+After Docker import, copy into the volume or run [`tools/deploy/restore-data-volume.sh`](tools/deploy/restore-data-volume.sh) and `docker compose restart backend`.
 
-## 效果图
+Without import, Wiki/quests/recipe search return empty or 404.
 
-<details>
-<summary>点击展开</summary>
+**Wiki icons:** `website/public/items_GTNH280.json` + `website/public/img/items/` — [`kb/04-nesql/wiki-icons.ru.md`](kb/04-nesql/wiki-icons.ru.md).
 
-![监控](assets/monitor.jpeg)
-![物品](assets/items.png)
-![流体](assets/fluids.png)
-![下单](assets/craft.png)
-![CPU](assets/cpus.png)
-![任务](assets/tasks.png)
-![自动化](assets/automate.png)
-![移动端](assets/mobile.png)
-![暗色模式](assets/dark.jpeg)
+---
 
-</details>
+## Documentation index
 
-## 扩展插件
+### Architecture & API
 
-### 1. monitor
+| Document | Description |
+|----------|-------------|
+| [`kb/01-architecture/overview.md`](kb/01-architecture/overview.md) | Deployment template, troubleshooting |
+| [`kb/01-architecture/api-contract.md`](kb/01-architecture/api-contract.md) | `/api/task/*` contract |
+| [`kb/01-architecture/oc-polling.md`](kb/01-architecture/oc-polling.md) | Long-poll flow |
+| [`kb/01-architecture/implementation-status.md`](kb/01-architecture/implementation-status.md) | Feature checklist |
+| [`kb/01-architecture/decisions/`](kb/01-architecture/decisions/) | ADRs (monorepo, robots, autocraft, map, …) |
 
-#### 功能
-- 监控兰波顿电容的电量和无线电网电量
-- 兰波顿电量和无线电网电量历史趋势
+### OpenComputers & GTNH
 
-#### 准备工作
-- 将适配器连接到兰波顿库电容上
+| Document | Description |
+|----------|-------------|
+| [`kb/02-opencomputers/oc-client-install.md`](kb/02-opencomputers/oc-client-install.md) | File layout, wget |
+| [`kb/02-opencomputers/robots-setup.ru.md`](kb/02-opencomputers/robots-setup.ru.md) | Robots setup (RU) |
+| [`kb/02-opencomputers/filtering-rules.md`](kb/02-opencomputers/filtering-rules.md) | `OpenComputers.cfg` HTTP allowlist |
+| [`kb/02-opencomputers/component-me.md`](kb/02-opencomputers/component-me.md) | ME / AE2 Lua API notes |
+| [`kb/02-opencomputers/component-internet.md`](kb/02-opencomputers/component-internet.md) | Internet card |
+| [`kb/03-gtnh/ae2-patterns.md`](kb/03-gtnh/ae2-patterns.md) | Pattern programming |
+| [`kb/03-gtnh/gt-miner.md`](kb/03-gtnh/gt-miner.md) | GT miners |
+| [`kb/03-gtnh/ic2-crops.md`](kb/03-gtnh/ic2-crops.md) | IC2 crops |
+| [`kb/03-gtnh/gt-power-deploy.md`](kb/03-gtnh/gt-power-deploy.md) | Power robots |
 
-#### 配置
-- 修改`powerMonitor.lua`文件中代理地址为兰波顿电容库地址
-- 将后端`config.py`的定时任务设置添加以下内容:
-    ```Python
-    timer_task_config = {
-        # {...}, 其他定时任务配置
-        "monitor": {
-            'interval': 300,  # 间隔时间
-            "client_id": "client_01",
-            "commands": [
-                "return getCapacitorInfo()",
-            ],
-            "cache": True,
-            "handle": parse_data,
-            "callback": None,
-            "save_history": True,
-            "history_days": 7,  # 历史记录最大保存天数
-        },
-    }
-    ```
-- 在网页前端的`设置`中启用监控页面
+### NESQL & tools
 
-## TODO
-> 以下内容为计划添加的内容，不一定全部实现，欢迎大家提交PR
-- OC: 添加更多插件
-- 后端: 添加更多自动化任务类型并且可配置
-- 后端: 新增Redis支持，用于存储数据
-- 后端: 新增OC客户端离线检测
-- 前端: 自动化任务页面根据后端任务类型动态生成
-- 前端: 新增页面，用于输入后端地址和令牌后才能进入
+| Document | Description |
+|----------|-------------|
+| [`kb/04-nesql/schema.md`](kb/04-nesql/schema.md) | SQLite schema |
+| [`kb/04-nesql/export-howto.md`](kb/04-nesql/export-howto.md) | Export + import walkthrough |
+| [`kb/04-nesql/wiki-icons.ru.md`](kb/04-nesql/wiki-icons.ru.md) | Item icons in UI |
+| [`tools/nesql-import/README.md`](tools/nesql-import/README.md) | Import CLI |
+| [`tools/deploy/README.md`](tools/deploy/README.md) | Deploy, backup, volumes |
 
-## 其他
+### Other
 
-### RemoteOC框架
+| Document | Description |
+|----------|-------------|
+| [`kb/README.md`](kb/README.md) | How to use the knowledge base |
+| [`kb/07-glossary.md`](kb/07-glossary.md) | GTNH/OC terms |
+| [`kb/01-architecture/github-first-deploy.md`](kb/01-architecture/github-first-deploy.md) | First push to GitHub (RU) |
+| [`oc-client/README.md`](oc-client/README.md) | Lua client quick reference |
 
-[https://github.com/z5882852/RemoteOC](https://github.com/z5882852/RemoteOC)
+`kb/05-vendored/` — git submodules (upstream RemoteOC, nesql-exporter, OpenComputers-GTNH). **Read-only** reference; do not edit.
 
-### nbt标签解析
+---
 
-[https://github.com/sjmulder/nbt-js](https://github.com/sjmulder/nbt-js)
+## Publishing to GitHub
 
-### 物品和流体图标、数据导出
+First-time setup (install Git, connect empty GitHub repo, push): **[`kb/01-architecture/github-first-deploy.md`](kb/01-architecture/github-first-deploy.md)** (Russian; steps are universal).
 
-[https://github.com/RealSilverMoon/nesql-exporter/](https://github.com/RealSilverMoon/nesql-exporter/)
+Before the first public push:
 
+1. `cp oc-client/env.lua.example oc-client/env.lua` locally — do not commit `env.lua`.
+2. `cp .env.example .env` — do not commit `.env` / `server/.env`.
+3. `git rm --cached server/.env oc-client/env.lua` if they were ever tracked.
+4. **Rotate `SERVER_TOKEN`** if it appeared in git history.
+5. Keep private runbooks (IPs, SSH, world paths) out of the repo.
+6. Do not commit `data/`, `*.sqlite`, or secrets inside submodules.
 
+---
+
+## License
+
+**MIT** — see [`LICENSE`](LICENSE) (Copyright (c) 2024 z5882852).
+
+Upstream [RemoteOC-GTNH-AE2](https://github.com/z5882852/RemoteOC-GTNH-AE2) is MIT. Third-party submodules under `kb/05-vendored/` have their own licenses (`LICENSE*`, `LICENSE.md` in each tree).

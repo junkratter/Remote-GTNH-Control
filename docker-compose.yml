@@ -1,26 +1,45 @@
-version: "3"
-services:
-  roc-gtnh-frontend:
-    image: z5882852/roc-gtnh-frontend:latest
-    container_name: roc-gtnh-frontend
-    # 如果开启https，请提供证书，将USE_HTTPS设置为true，将443端口映射到宿主机
-    #volumes:
-    #  - ./server.crt:/etc/nginx/etc/crt/server.crt
-    #  - ./server.key:/etc/nginx/etc/crt/server.key
-    environment:
-      - SERVER_NAME=localhost # 域名或localhost(本地)
-      - USE_HTTPS=false
-    ports:
-      - "80:80"
-      # - "443:443"
-    restart: always
+volumes:
+  gtnh_cyber_data:
+    name: gtnh_cyber_data
 
-  roc-gtnh-backend:
-    image: z5882852/roc-gtnh-backend:latest
-    container_name: roc-gtnh-backend
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: gtnh-cyber/backend:latest
+    container_name: gtnh-cyber-backend
     env_file:
       - .env
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ACCESS_LOG_HTTP: ${ACCESS_LOG_HTTP:-false}
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_PORT: 1030
+      DATABASE_URL: sqlite+aiosqlite:////app/data/gtnh-cyber.sqlite
+      SYNC_DATABASE_URL: sqlite:////app/data/gtnh-cyber.sqlite
+      NESQL_DATABASE_URL: sqlite:////app/data/nesql.sqlite
     ports:
-      # 端口映射到宿主机，如果需要修改宿主机端口，请修改为"宿主机端口:1030"
-      - "8080:1030"
-    restart: always
+      - "${BACKEND_PORT_HOST:-8856}:1030"
+    volumes:
+      # Named volume: DBs survive image rebuilds. Host mirror: ./data/backend (see tools/deploy/backup-data.sh).
+      - gtnh_cyber_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:1030/api/info/version"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    image: gtnh-cyber/frontend:latest
+    container_name: gtnh-cyber-frontend
+    ports:
+      - "${FRONTEND_PORT_HOST:-8855}:80"
+    restart: unless-stopped
+    depends_on:
+      - backend

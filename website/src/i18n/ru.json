@@ -1,0 +1,699 @@
+{
+  "app": {
+    "title": "GTNH Cyber",
+    "loading": "Загрузка..."
+  },
+  "home": {
+    "subtitle": "Веб-панель управления AE2 в GT New Horizons на базе OpenComputers",
+    "repo": "Репозиторий",
+    "author": "Автор",
+    "mobile_hint": "Полный функционал удобнее использовать на десктопе."
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "refresh": "Обновить",
+    "search": "Поиск",
+    "yes": "Да",
+    "no": "Нет",
+    "error": "Ошибка",
+    "success": "Готово",
+    "empty": "Нет данных",
+    "add": "Добавить",
+    "edit": "Изменить",
+    "confirm": "Подтвердить",
+    "actions": "Действия",
+    "submit": "Отправить",
+    "details": "Подробнее",
+    "remove": "Удалить",
+    "index": "№",
+    "unknown": "Неизвестно",
+    "empty_response": "Пустой ответ сервера",
+    "unknown_error": "Неизвестная ошибка"
+  },
+  "error_display": {
+    "title": "Не удалось загрузить данные",
+    "unknown": "Неизвестная ошибка",
+    "hint": "Проверьте URL бэкенда и токен в настройках.",
+    "refresh": "Обновить страницу"
+  },
+  "errors": {
+    "tasks": {
+      "set_backend": "Сначала укажите URL бэкенда в настройках.",
+      "bad_response": "Некорректный ответ сервера (проверьте URL бэкенда в настройках).",
+      "missing_token": "Укажите Server Token в настройках (заголовок X-Server-Token).",
+      "status_fail": "Не удалось получить статус задачи ({code}): {detail}",
+      "status_catch": "Ошибка запроса статуса: {detail}",
+      "submit_fail": "Не удалось отправить задачу ({code}): {detail}",
+      "submit_catch": "Ошибка отправки задачи: {detail}",
+      "submit_no_id": "Не удалось отправить задачу: пустой task id.",
+      "refresh_cpu": "Не удалось обновить список CPU: {detail}"
+    },
+    "history": {
+      "empty": "История для этой задачи пока пуста.",
+      "fail": "Не удалось загрузить историю: {detail}",
+      "catch": "Ошибка запроса истории: {detail}"
+    },
+    "craft": {
+      "title": "Заказ крафта",
+      "submitted": "Заказ отправлен. См. «Задачи». ID: {taskId}",
+      "success": "Заказ выполнен. См. «Задачи». ID: {taskId}",
+      "failed": "Заказ не выполнен{reason}. См. «Задачи». ID: {taskId}",
+      "reason_missing": ": не хватает материалов или нет свободного CPU",
+      "reason_unknown": ": неизвестная ошибка"
+    },
+    "automate": {
+      "http_error": "{action}: сервер вернул {code}. {detail}",
+      "http_throw": "{action}: {detail}",
+      "actions": {
+        "trigger_config": "Конфигурация триггеров",
+        "trigger_add": "Добавление триггера",
+        "trigger_remove": "Удаление триггера",
+        "trigger_list": "Список триггеров",
+        "trigger_start": "Запуск триггера",
+        "trigger_stop": "Остановка триггера",
+        "timer_config": "Конфигурация таймеров",
+        "timer_add": "Добавление таймера",
+        "timer_remove": "Удаление таймера",
+        "timer_list": "Список таймеров",
+        "timer_start": "Запуск таймера",
+        "timer_stop": "Остановка таймера",
+        "action_template": "Шаблоны действий"
+      }
+    }
+  },
+  "cpu": {
+    "busy": "Занят",
+    "idle": "Свободен",
+    "last_update": "Обновлено",
+    "select": "Выберите CPU",
+    "auto_alloc": "Авто",
+    "get_info": "Обновить CPU",
+    "status": "Статус",
+    "storage": "Память",
+    "coprocessors": "Сопроцессоры",
+    "crafting": "Крафт",
+    "planned": "В очереди",
+    "stored": "В буфере",
+    "no_items": "Нет предметов",
+    "request_sent": "Запрос отправлен, ждём OC… ({task})",
+    "refresh_success": "Список CPU обновлён",
+    "refresh_failed": "Не удалось обновить CPU ({msg})"
+  },
+  "automateUi": {
+    "load_tasks_failed": "Не удалось загрузить задачи: {detail}",
+    "load_config_failed": "Не удалось загрузить конфиг задач: {detail}",
+    "fill_condition_action": "Заполните условие триггера и действие полностью.",
+    "pick_cpu": "Выберите CPU для мониторинга.",
+    "interval_seconds": "Укажите интервал опроса (не менее 1 с).",
+    "delay_min_60": "Задержка должна быть не менее 60 с.",
+    "pick_schedule_time": "Выберите время расписания.",
+    "schedule_future": "Время расписания должно быть в будущем.",
+    "pick_craft_item": "Выберите предмет для крафта.",
+    "craft_amount_min": "Укажите количество крафта (не менее 1).",
+    "json_body_invalid": "Тело запроса должно быть корректным JSON.",
+    "invalid_headers": "{n} неверных заголовков (пустой ключ или значение).",
+    "invalid_params": "{n} неверных URL-параметров (пустой ключ или значение).",
+    "url_required": "URL запроса не может быть пустым.",
+    "method_required": "Метод HTTP не может быть пустым.",
+    "url_suspicious": "Формат URL выглядит подозрительно — проверьте.",
+    "invalid_trigger": "Неверное условие триггера.",
+    "adding_wait": "Добавление задачи, подождите…",
+    "task_added": "Задача добавлена.",
+    "template_fetch_warn": "Не удалось получить данные шаблона.",
+    "task_invalid": "Некорректные данные задачи.",
+    "task_started": "Задача запущена.",
+    "task_stopped": "Задача остановлена.",
+    "task_detail_unavailable": "Нельзя показать детали задачи.",
+    "task_removed": "Задача удалена.",
+    "template_invalid": "Некорректный шаблон.",
+    "template_applied": "Шаблон применён.",
+    "template_apply_failed": "Не удалось применить шаблон."
+  },
+  "tasks": {
+    "last_update": "Обновлено",
+    "add_monitor": "Добавить отслеживание",
+    "refresh_list": "Обновить список",
+    "task_id": "ID задачи",
+    "type": "Тип",
+    "created_time": "Создана",
+    "executed_time": "Запуск",
+    "completed_time": "Завершена",
+    "status_col": "Статус",
+    "details": "Детали задачи",
+    "click_for_details": "Нажмите для деталей",
+    "load_failed": "Не удалось загрузить задачи",
+    "fetch_status_failed": "Не удалось получить статус задачи {id}",
+    "prompt_id": "Введите ID задачи",
+    "submit_task": "Добавить задачу",
+    "bad_id": "Неверный ID",
+    "empty_id": "Пустой ID",
+    "custom_kind": "Вручную",
+    "added_success": "Задача добавлена в список",
+    "status": {
+      "ready": "Ожидание запроса",
+      "pending": "Ожидание ответа",
+      "completed": "Готово",
+      "unknown": "Неизвестно"
+    }
+  },
+  "info": {
+    "gtnh_version": "Версия GTNH",
+    "web_version": "Версия веб",
+    "backend_version": "Версия бэкенда",
+    "oc_clients": "OC-клиенты",
+    "clients_count": "{n} шт. — нажмите для деталей",
+    "source_code": "Исходный код",
+    "issues": "Issues",
+    "api_docs": "Документация API",
+    "license": "Лицензия",
+    "client_dialog_title": "Клиенты",
+    "client_id": "ID клиента",
+    "last_active": "Последняя активность",
+    "backend_not_configured": "URL бэкенда не задан",
+    "fetch_meta_failed": "Не удалось загрузить метаданные ({code}): {msg}",
+    "fetch_clients_failed": "Не удалось загрузить клиентов ({code}): {msg}"
+  },
+  "items": {
+    "search_placeholder": "Поиск…",
+    "search_type": "Поле",
+    "title_field": "Отображаемое имя",
+    "label_field": "Метка",
+    "get": "Обновить предметы",
+    "amount": "Количество",
+    "craftable_tag": "Крафт",
+    "stored": "В сети",
+    "other_props": "Прочие поля",
+    "click_copy": "Нажмите, чтобы скопировать",
+    "craft_action": "Заказать крафт",
+    "last_update": "Обновлено",
+    "total_count": "Всего: {n}",
+    "craft_amount": "Количество",
+    "amount_placeholder": "Сколько заказать",
+    "select_cpu": "CPU",
+    "fetch_cpus_first": "Сначала загрузите список CPU",
+    "cpu_only_named_idle": "Только именованные свободные CPU",
+    "get_cpu": "Загрузить CPU",
+    "craft_dialog_title": "Заказ крафта",
+    "craft_dialog_with_name": "Крафт — {name}",
+    "uploading": "Клиент загружает данные… ({task})",
+    "request_sent": "Запрос отправлен, ждём OC… ({task})",
+    "copy_success": "Скопировано",
+    "copy_failed": "Не удалось скопировать",
+    "refresh_success": "Список предметов обновлён",
+    "filter": {
+      "all": "Все",
+      "craftable": "Только крафт",
+      "items": "Предметы",
+      "fluids": "Жидкости"
+    }
+  },
+  "monitor": {
+    "eu_stored": "Лапотрон (EU)",
+    "wireless_eu": "Беспроводная сеть (EU)",
+    "wireless_eu_tooltip": "Данные с лапотронного конденсатора",
+    "no_history": "Истории пока нет",
+    "parse_failed": "Не удалось разобрать историю",
+    "vs_previous": "к предыдущей точке",
+    "trend": {
+      "title": "История",
+      "units_heading": "Суффиксы чисел:",
+      "unit_k": "K = тысяча (10³)",
+      "unit_m": "M = миллион (10⁶)",
+      "unit_g": "G = миллиард (10⁹)",
+      "unit_t": "T = триллион (10¹²)",
+      "unit_p": "P = квадриллион (10¹⁵)",
+      "unit_e": "E = квинтиллион (10¹⁸)",
+      "unit_z": "Z = секстиллион (10²¹)",
+      "unit_y": "Y = септиллион (10²⁴)",
+      "time_range": "Диапазон",
+      "granularity": "Шаг",
+      "range_1h": "Последний час",
+      "range_4h": "Последние 4 ч",
+      "range_12h": "Последние 12 ч",
+      "range_24h": "Последние сутки",
+      "range_72h": "Последние 3 дня",
+      "range_168h": "Последние 7 дней",
+      "range_custom": "Свой",
+      "granularity_none": "Нет",
+      "granularity_1h": "Среднее за час",
+      "date_range_to": "—",
+      "start_time": "Начало",
+      "end_time": "Конец",
+      "empty": "Нет данных",
+      "shortcut_last_1d": "Последние сутки",
+      "shortcut_last_3d": "Последние 3 дня",
+      "shortcut_last_7d": "Последние 7 дней",
+      "stats_max": "Макс.",
+      "stats_min": "Мин.",
+      "stats_avg": "Средн.",
+      "stats_line": "Макс.: {max}  Мин.: {min}  Средн.: {avg}"
+    }
+  },
+  "automate_page": {
+    "last_update": "Обновлено",
+    "add_task": "Добавить автоматизацию",
+    "refresh": "Обновить список",
+    "col_index": "№",
+    "col_id": "ID",
+    "col_type": "Тип",
+    "col_trigger": "Триггер",
+    "col_action": "Действие",
+    "col_status": "Статус",
+    "col_ops": "Действия",
+    "detail_btn": "Подробнее",
+    "remove_btn": "Удалить",
+    "start": "Старт",
+    "stop": "Стоп",
+    "types": { "trigger": "Триггер", "timer": "Таймер" },
+    "group": { "trigger": "Триггеры", "timer": "Таймеры" },
+    "names": {
+      "cpu_idle": "Когда CPU простаивает",
+      "delay_timer": "Запуск с задержкой",
+      "scheduled_timer": "Запуск по расписанию"
+    },
+    "trigger_desc": {
+      "cpu_idle": "Когда выбранный CPU переходит в простой (idle)."
+    },
+    "timer_desc": {
+      "delay_timer": "Одноразовый запуск через указанное число секунд.",
+      "scheduled_timer": "Одноразовый запуск в заданную дату и время."
+    },
+    "action_kind": {
+      "craft": "Синтез предмета",
+      "http_request": "HTTP-запрос"
+    },
+    "loading": "Загрузка…",
+    "detail_title": "Детали автоматизации",
+    "add_title": "Добавить автоматизацию",
+    "basic_info": "Сводка",
+    "lifecycle": "Жизненный цикл",
+    "interval_sec": "Интервал опроса",
+    "sec": "с",
+    "timeline_created": "Создано",
+    "timeline_start": "Последний старт",
+    "timeline_monitor": "Последний опрос",
+    "timeline_execute": "Выполнение действия",
+    "timeline_execute_est": "(ожидается)",
+    "timeline_done": "Завершено",
+    "trigger_section": "Условие",
+    "action_section": "Действие",
+    "craft_target": "Цель крафта",
+    "result": "Результат",
+    "none": "Нет",
+    "form_trigger": "Условие",
+    "form_trigger_ph": "Выберите условие",
+    "watch_cpu": "Наблюдаемый CPU",
+    "cpu_busy_footer": "Только именованные занятые CPU",
+    "client_id": "ID клиента",
+    "client_id_tip": "Пусто — по умолчанию",
+    "client_id_ph": "client_id",
+    "poll_interval": "Интервал опроса",
+    "delay_label": "Задержка",
+    "delay_ph": "Секунды",
+    "schedule_label": "Время запуска",
+    "schedule_ph": "Дата и время",
+    "form_action": "Действие",
+    "form_action_ph": "Выберите действие",
+    "target_item": "Предмет",
+    "fluid_search_footer": "Жидкости: ищите по внутреннему имени",
+    "craft_qty": "Количество",
+    "craft_qty_ph": "Сколько",
+    "unit_count": "шт.",
+    "cpu_optional": "CPU (необязательно)",
+    "cpu_busy_tip": "Если CPU занят в момент заказа, крафт может не стартовать",
+    "http_method": "Метод",
+    "http_method_ph": "Метод",
+    "http_url": "URL",
+    "http_url_ph": "https://…",
+    "http_headers": "Заголовки",
+    "http_params": "Параметры",
+    "http_body": "Тело (JSON)",
+    "key_ph": "Ключ",
+    "value_ph": "Значение",
+    "remove_row": "Удалить",
+    "add_row": "Добавить",
+    "use_template": "Шаблон",
+    "add_btn": "Добавить",
+    "template_title": "Шаблоны",
+    "template_col_name": "Имя",
+    "template_col_desc": "Описание",
+    "template_use": "Применить",
+    "status": { "ready": "Готово", "pending": "Работает", "completed": "Завершено" },
+    "errors": {
+      "backend_url": "Задайте URL бэкенда в настройках",
+      "trigger_list": "Не удалось загрузить триггеры",
+      "timer_list": "Не удалось загрузить таймеры",
+      "load_tasks": "Не удалось загрузить задачи",
+      "incomplete_form": "Выберите условие и действие",
+      "pick_cpu": "Выберите CPU",
+      "interval_min": "Интервал не меньше 1 с",
+      "delay_min": "Задержка не меньше 60 с",
+      "pick_time": "Выберите время",
+      "future_time": "Время должно быть в будущем",
+      "pick_item": "Выберите предмет для крафта",
+      "qty_min": "Количество не меньше 1",
+      "invalid_json": "Тело запроса должно быть JSON",
+      "invalid_headers": "Некорректных строк заголовков: {n}",
+      "invalid_params": "Некорректных параметров: {n}",
+      "url_required": "Нужен URL",
+      "method_required": "Нужен HTTP-метод",
+      "url_warn": "URL выглядит необычно — проверьте",
+      "invalid_trigger": "Неверное условие",
+      "adding": "Отправка…",
+      "trigger_cfg": "Не удалось загрузить конфиг триггеров",
+      "timer_cfg": "Не удалось загрузить конфиг таймеров",
+      "load_cfg": "Не удалось загрузить конфиг автоматизации",
+      "templates_fail": "Не удалось загрузить шаблоны",
+      "invalid_task": "Некорректная задача",
+      "invalid_template": "Некорректный шаблон",
+      "detail_fail": "Не удалось открыть детали"
+    },
+    "success": {
+      "added": "Задача создана",
+      "started": "Запущено",
+      "stopped": "Остановлено",
+      "removed": "Удалено"
+    }
+  },
+  "menu": {
+    "home": "Главная",
+    "monitor": "Мониторинг",
+    "items": "Терминал",
+    "cpus": "CPU",
+    "tasks": "Задачи",
+    "automate": "Автоматизация",
+    "robots": "Роботы",
+    "autocraft": "Автокрафт",
+    "map": "Карта",
+    "quests": "Квесты",
+    "wiki": "Wiki",
+    "settings": "Настройки",
+    "info": "Инфо"
+  },
+  "lang": {
+    "switch": "Язык",
+    "ru": "Русский",
+    "en": "English",
+    "zh": "中文"
+  },
+  "robots": {
+    "tabs": {
+      "registry": "Флот",
+      "mining": "Задания майнера",
+      "power": "Генераторы / турбины"
+    },
+    "hint": "Плагины OC: robot_crop, robot_miner, robot_power (генератор + капсулы). Задачи — POST /api/task/add. См. kb/02-opencomputers/robots-setup.ru.md и kb/03-gtnh/gt-power-deploy.md.",
+    "register": {
+      "client_id": "Client ID",
+      "client_ph": "напр. robot_crop_01",
+      "kind": "Роль",
+      "label": "Метка",
+      "label_ph": "Необязательно",
+      "submit": "Зарегистрировать / обновить",
+      "need_id": "Укажите client ID",
+      "presets": "Быстро",
+      "preset_ae": "Пример: client_01 (AE)",
+      "preset_miner": "Пример: robot_miner_01"
+    },
+    "actions": {
+      "harvest": "В очередь harvestBelow",
+      "ping": "В очередь ping майнера",
+      "power_ping": "Ping генератора",
+      "task_queued": "Задача поставлена — см. страницу «Задачи»"
+    },
+    "power": {
+      "robot_client": "Client ID робота",
+      "robot_ph": "robot_miner_01",
+      "generator_kind": "Тип генератора",
+      "fuel_kind": "Топливо",
+      "capsule_count": "Капсул (попыток)",
+      "create": "Создать задание",
+      "queue_deploy": "В очередь deploy",
+      "need_robot": "Нужен client ID робота"
+    },
+    "mining": {
+      "robot_client": "Client ID робота",
+      "robot_ph": "robot_miner_01",
+      "miner_kind": "Тип майнера",
+      "dimension": "Измерение",
+      "note": "Заметка",
+      "create": "Создать задание",
+      "coords": "XYZ",
+      "state": "Статус",
+      "mark_running": "В работе",
+      "mark_done": "Готово",
+      "queue_accept": "В очередь accept",
+      "queue_deploy": "В очередь deploy",
+      "queued_on_create": "Задание создано и отправлено роботу (статус: в работе)",
+      "need_robot": "Нужен client ID робота"
+    },
+    "list": {
+      "title": "Роботы",
+      "empty": "Роботы не зарегистрированы",
+      "columns": {
+        "client_id": "Client ID",
+        "kind": "Тип",
+        "state": "Состояние",
+        "last_message": "Сообщение"
+      }
+    },
+    "kind": {
+      "ae": "ME / AE2 (client_01)",
+      "crop": "Фермер кропов",
+      "miner": "Шахтёр",
+      "power": "Энергия (генератор)",
+      "scanner": "Сканер",
+      "generic": "Общий"
+    },
+    "state": {
+      "idle": "Простой",
+      "moving": "В пути",
+      "working": "Работает",
+      "unloading": "Разгрузка",
+      "returning": "Возврат",
+      "error": "Ошибка"
+    }
+  },
+  "autocraft": {
+    "title": "Автокрафт",
+    "patterns": {
+      "title": "Паттерны AE2",
+      "empty": "Паттерны не запрограммированы",
+      "add": "Добавить паттерн",
+      "edit": "Изменить паттерн",
+      "program": "Записать",
+      "program_prompt": "ID компьютера OC, на котором программировать паттерн:",
+      "confirm_delete": "Удалить паттерн #{id}?",
+      "col_label": "Описание",
+      "col_iface": "ME Interface",
+      "col_kind": "Тип",
+      "col_id": "ID",
+      "col_slot": "Слот",
+      "kind_processing": "Обработка",
+      "kind_crafting": "Крафт",
+      "field": {
+        "label": "Описание",
+        "iface": "Адрес ME Interface",
+        "slot": "Слот",
+        "kind": "Тип паттерна",
+        "inputs": "Входы",
+        "outputs": "Выходы"
+      }
+    },
+    "requests": {
+      "title": "Очередь крафтов",
+      "empty": "Заказов на крафт ещё нет",
+      "request_item": "Заказать крафт",
+      "submit": "Отправить",
+      "col_item": "Предмет",
+      "col_amount": "Количество",
+      "col_cpu": "CPU",
+      "col_state": "Статус",
+      "col_id": "ID",
+      "col_client": "Клиент",
+      "state": {
+        "queued": "В очереди",
+        "cancelling": "Отмена…",
+        "done": "Готово",
+        "failed": "Ошибка"
+      },
+      "field": {
+        "client": "Client ID",
+        "item": "Internal name предмета",
+        "damage": "Damage",
+        "amount": "Количество",
+        "cpu": "Имя CPU (опционально)"
+      }
+    },
+    "cpus": {
+      "scan": "Сканировать CPU",
+      "detail": "Включая детальную активность"
+    },
+    "item": {
+      "name": "имя",
+      "damage": "dmg",
+      "amount": "кол-во"
+    },
+    "wiki": {
+      "fill_from": "Заполнить из wiki (NESQL)",
+      "dialog_title": "Рецепт из NESQL",
+      "search_ph": "Поиск предмета…",
+      "search_btn": "Найти",
+      "recipes_for": "Рецепты с этим выходом",
+      "apply": "Подставить входы/выходы",
+      "hint": "Нужен импортированный NESQL; в ME должны быть машины под тип рецепта.",
+      "no_items": "Ничего не найдено",
+      "no_recipes": "Нет рецептов",
+      "skipped_fluids": "Жидкостные слоты пропущены (задайте вручную при необходимости)",
+      "back": "К списку предметов",
+      "recipe_line": "{type} · {eu} EU/т · {ticks} тик"
+    }
+  },
+  "map": {
+    "title": "Карта мира",
+    "empty": "Сканирование ещё не было",
+    "dimension": "Измерение",
+    "refresh": "Обновить",
+    "filters": {
+      "ore": "Руды",
+      "fluid": "Жидкости",
+      "all": "Все"
+    },
+    "settings_hint": "Центр карты (origin) настраивается в разделе «Настройки»."
+  },
+  "quests": {
+    "title": "Квесты GTNH",
+    "empty": "NESQL ещё не импортирован",
+    "refresh": "Обновить",
+    "search_ph": "Поиск квестов (мин. 2 символа)…",
+    "search_btn": "Найти",
+    "search_hint": "Запрос к /api/quests/search по импортированной базе NESQL.",
+    "col_line": "Линия",
+    "back_tree": "Полное дерево",
+    "detail_title": "Квест",
+    "tasks": "Задачи",
+    "rewards": "Награды",
+    "view_board": "Книга квестов",
+    "view_tree": "Дерево",
+    "select_line": "Глава квестов",
+    "board": {
+      "completion": "Выполнено: {done}/{total}",
+      "empty_line": "В этой главе нет квестов (проверьте импорт NESQL).",
+      "auto_layout": "Схема построена автоматически по зависимостям (координаты BQ в NESQL не обязательны)."
+    }
+  },
+  "wiki": {
+    "title": "Wiki (NESQL)",
+    "search_placeholder": "Поиск предметов...",
+    "meta": {
+      "unavailable": "NESQL ещё не импортирован. См. tools/nesql-import/.",
+      "imported": "{count} предметов, БД {size}"
+    },
+    "filter": {
+      "mod_all": "Все моды"
+    },
+    "col": {
+      "name": "Название",
+      "internal": "Internal",
+      "mod": "Мод",
+      "damage": "Damage",
+      "stack": "Стак"
+    },
+    "detail": {
+      "title": "Предмет",
+      "oredict": "OreDict",
+      "aspects": "Аспекты Thaumcraft",
+      "recipes_out": "Рецепты, производящие предмет",
+      "recipe_type": "Тип",
+      "duration": "Тики",
+      "empty": "Пусто",
+      "recipe_click": "Нажмите строку, чтобы открыть схему рецепта."
+    },
+    "recipe": {
+      "machine": "Механизм",
+      "inputs": "Вход",
+      "outputs": "Выход",
+      "fluid": "Жидкость",
+      "ticks": "{n} тиков",
+      "eu": "{n} EU/t"
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "alert": "Не передавай содержимое этой страницы другим. Все значения хранятся локально в браузере (localStorage).",
+    "confirm_reload": "Перезагрузить страницу, чтобы применить изменения?",
+    "dark_mode": "Тёмная тема",
+    "language": "Язык интерфейса",
+    "section": {
+      "backend": "Бэкенд",
+      "basic": "Основные",
+      "map": "Карта мира",
+      "other": "Дополнительно"
+    },
+    "fields": {
+      "backendUrl": {
+        "label": "Адрес бэкенда",
+        "placeholder": "пусто = тот же хост (прокси /api)",
+        "tooltip": "Оставьте пустым, если фронт проксирует /api на бэкенд. Иначе укажите URL бэкенда, например http://хост:18856"
+      },
+      "token": {
+        "label": "Серверный токен",
+        "placeholder": "X-Server-Token"
+      },
+      "pageTitle": {
+        "label": "Заголовок страницы",
+        "placeholder": "GTNH Cyber"
+      },
+      "numberFormatting": {
+        "label": "Формат чисел"
+      },
+      "showMoniter": {
+        "label": "Показывать вкладку «Мониторинг»",
+        "tooltip": "Включает страницу мониторинга.<br/>Требуется включённый плагин `moniter` в OC-клиенте."
+      },
+      "showFluid": {
+        "label": "Отображать иконки жидкостей для капель"
+      },
+      "refreshCPU": {
+        "label": "Обновлять список CPU после заказа",
+        "tooltip": "После выполнения заказа возвращается список CPU (в памяти, сбрасывается при перезагрузке).<br/>Не включать при частых заказах или большом числе CPU."
+      },
+      "useTaskGzip": {
+        "label": "Сжимать результаты задач",
+        "tooltip": "Возвращает результат задачи в gzip-формате.<br/>Увеличивает нагрузку на CPU, полезно для больших ответов."
+      },
+      "useGzip": {
+        "label": "Сжимать каталог предметов",
+        "tooltip": "Запрашивает файл предметов в gzip (`items_GTNH*.json.gz`).<br/>Отключи, если фронт-прокси (nginx) уже сжимает ответы."
+      },
+      "resourceUrl": {
+        "label": "Произвольный источник данных",
+        "placeholder": "Каталог, где лежат JSON-файлы предметов"
+      },
+      "mapOriginX": {
+        "label": "Карта: центр X (F3)",
+        "placeholder": "3220",
+        "tooltip": "Мировая координата X базы. Точки на карте смещаются относительно неё."
+      },
+      "mapOriginZ": {
+        "label": "Карта: центр Z (F3)",
+        "placeholder": "-4900",
+        "tooltip": "Мировая координата Z базы (как на скрине F3)."
+      },
+      "mapDefaultDimension": {
+        "label": "Карта: измерение по умолчанию",
+        "placeholder": "0",
+        "tooltip": "0 — обычный мир, -1 — Незер и т.д."
+      }
+    },
+    "segments": {
+      "numberFormatting": {
+        "original": "Без формата",
+        "thousand": "1 000",
+        "short": "Сокращённо"
+      }
+    }
+  }
+}

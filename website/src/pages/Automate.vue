@@ -3,102 +3,108 @@
         <el-header class="control-header-task">
             <el-card class="control-card" shadow="hover">
                 <div class="control-bar">
-                    <span>最近更新时间: {{ lastUpdate }}</span>
+                    <span>{{ $t('automate_page.last_update') }}: {{ lastUpdate }}</span>
                     <div style="text-align: right;">
                         <el-button type="primary" :size="isMobile ? 'small' : ''"
-                            @click="showAutoTaskDialog">添加自动化任务</el-button>
+                            @click="showAutoTaskDialog">{{ $t('automate_page.add_task') }}</el-button>
                         <el-button type="primary" :size="isMobile ? 'small' : ''"
-                            @click="loadAutoTasks">刷新任务列表</el-button>
+                            @click="loadAutoTasks">{{ $t('automate_page.refresh') }}</el-button>
                     </div>
                 </div>
             </el-card>
         </el-header>
-        <el-main style="width: 100%; overflow: hidden;" v-loading="mainLoading" element-loading-text="loading">
+        <el-main style="width: 100%; overflow: hidden;" v-loading="mainLoading" :element-loading-text="$t('automate_page.loading')">
             <el-card class="table-box-card">
                 <el-table :data="tasks" border stripe style="width: 100%; height: 100%;">
-                    <el-table-column type="index" label="序号" width="80"  align="center"></el-table-column>
-                    <el-table-column prop="id" label="ID" width="320" align="center"></el-table-column>
-                    <el-table-column prop="type" label="类型" min-width="120" align="center"></el-table-column>
-                    <el-table-column prop="name" label="触发条件" min-width="120" align="center"></el-table-column>
-                    <el-table-column prop="action.name" label="执行操作" min-width="100" align="center"></el-table-column>
-                    <el-table-column prop="status" label="状态" min-width="85" align="center">
+                    <el-table-column type="index" :label="$t('automate_page.col_index')" width="80"  align="center"></el-table-column>
+                    <el-table-column prop="id" :label="$t('automate_page.col_id')" width="320" align="center"></el-table-column>
+                    <el-table-column prop="type" :label="$t('automate_page.col_type')" min-width="120" align="center">
+                        <template #default="{ row }">{{ displayTaskType(row.type) }}</template>
+                    </el-table-column>
+                    <el-table-column prop="name" :label="$t('automate_page.col_trigger')" min-width="120" align="center">
+                        <template #default="{ row }">{{ displayCatalogName(row.name) }}</template>
+                    </el-table-column>
+                    <el-table-column prop="action.name" :label="$t('automate_page.col_action')" min-width="100" align="center">
+                        <template #default="{ row }">{{ displayActionName(row.action) }}</template>
+                    </el-table-column>
+                    <el-table-column prop="status" :label="$t('automate_page.col_status')" min-width="85" align="center">
                         <template #default="{ row }">
-                            <el-tag :type="statusMap[row.status].type">{{ statusMap[row.status].text }}</el-tag>
+                            <el-tag :type="statusMap[row.status]?.type || 'info'">{{ statusMap[row.status]?.text || row.status }}</el-tag>
                         </template>
                     </el-table-column>
-                    <el-table-column label="操作" width="120" align="center" fixed="right">
+                    <el-table-column :label="$t('automate_page.col_ops')" width="120" align="center" fixed="right">
                         <template #default="{ row }">
                             <div class="op-button-grid">
                                 <el-button type="success" size="small" plain
                                     @click="handleStart(row)" :disabled="row.running || row.status === 'completed'">
-                                    启动
+                                    {{ $t('automate_page.start') }}
                                 </el-button>
                                 <el-button type="warning" size="small" plain
                                     @click="handleStop(row)" :disabled="!row.running || row.status === 'completed'">
-                                    停止
+                                    {{ $t('automate_page.stop') }}
                                 </el-button>
-                                <el-button size="small" plain @click="handleInfo(row)">详情</el-button>
-                                <el-button type="danger" size="small" plain @click="handleRemove(row)">移除</el-button>
+                                <el-button size="small" plain @click="handleInfo(row)">{{ $t('automate_page.detail_btn') }}</el-button>
+                                <el-button type="danger" size="small" plain @click="handleRemove(row)">{{ $t('automate_page.remove_btn') }}</el-button>
                             </div>
                         </template>
                     </el-table-column>
                 </el-table>
             </el-card>
         </el-main>
-        <!-- 任务详情 -->
-        <el-dialog v-model="showInfoDialog" class="task-dialog" title="自动化任务详情" fullscreen align-center>
+        <!-- Task detail -->
+        <el-dialog v-model="showInfoDialog" class="task-dialog" :title="$t('automate_page.detail_title')" fullscreen align-center>
             <el-scrollbar>
                 <div class="info-container">
                     <el-space alignment="normal" direction="vertical" style="width: 100%; margin-bottom: 20px;">
-                        <el-descriptions title="基本信息" :column="1" border label-width="80px">
-                            <el-descriptions-item label="ID">{{ info.id }}</el-descriptions-item>
-                            <el-descriptions-item label="类型">{{ info.type }}</el-descriptions-item>
-                            <el-descriptions-item label="状态">
-                                <el-tag :type="statusMap[info.status].type">{{ statusMap[info.status].text }}</el-tag>
+                        <el-descriptions :title="$t('automate_page.basic_info')" :column="1" border label-width="80px">
+                            <el-descriptions-item :label="$t('automate_page.col_id')">{{ info.id }}</el-descriptions-item>
+                            <el-descriptions-item :label="$t('automate_page.col_type')">{{ displayTaskType(info.type) }}</el-descriptions-item>
+                            <el-descriptions-item :label="$t('automate_page.col_status')">
+                                <el-tag :type="statusMap[info.status]?.type || 'info'">{{ statusMap[info.status]?.text || info.status }}</el-tag>
                             </el-descriptions-item>
-                            <el-descriptions-item v-if="info.type === '触发器'" label="检测间隔">
-                                {{ info.interval }} 秒
+                            <el-descriptions-item v-if="info.type === 'trigger'" :label="$t('automate_page.poll_interval')">
+                                {{ info.interval }} {{ $t('automate_page.sec') }}
                             </el-descriptions-item>
 
                         </el-descriptions>
 
                         <el-divider></el-divider>
-                        <el-text size="large">生命周期</el-text>
+                        <el-text size="large">{{ $t('automate_page.lifecycle') }}</el-text>
 
                         <el-timeline style="margin-top: 20px; width: 100%;">
                             <el-timeline-item :timestamp="info.time.created" size="large" color="#409EFF">
-                                任务创建
+                                {{ $t('automate_page.timeline_created') }}
                             </el-timeline-item>
                             <el-timeline-item v-if="info.time.last_start" :timestamp="info.time.last_start" size="large"
                                 color="#67C23A">
-                                上一次启动
+                                {{ $t('automate_page.timeline_start') }}
                             </el-timeline-item>
                             <el-timeline-item v-if="info.time.last_monitor" :timestamp="info.time.last_monitor"
                                 size="large" color="#E6A23C">
-                                最近检测
+                                {{ $t('automate_page.timeline_monitor') }}
                             </el-timeline-item>
                             <el-timeline-item v-if="info.time.excuted" :timestamp="info.time.excuted" size="large"
                                 :color="info.time.completed ? '#E6A23C' : ''">
-                                执行操作 {{ info.time.completed ? '' : '(预计)' }}
+                                {{ $t('automate_page.timeline_execute') }} {{ info.time.completed ? '' : $t('automate_page.timeline_execute_est') }}
                             </el-timeline-item>
                             <el-timeline-item v-if="info.time.completed" :timestamp="info.time.completed" size="large"
                                 color="#F56C6C">
-                                任务完成
+                                {{ $t('automate_page.timeline_done') }}
                             </el-timeline-item>
                         </el-timeline>
                         <el-divider></el-divider>
-                        <el-descriptions title="触发条件" :column="1" border label-width="150px">
-                            <el-descriptions-item label="类型">{{ info.name }}</el-descriptions-item>
-                            <el-descriptions-item label="描述">{{ info.description }}</el-descriptions-item>
+                        <el-descriptions :title="$t('automate_page.trigger_section')" :column="1" border label-width="150px">
+                            <el-descriptions-item :label="$t('automate_page.col_type')">{{ displayCatalogName(info.name) }}</el-descriptions-item>
+                            <el-descriptions-item :label="$t('automate_page.template_col_desc')">{{ info.description }}</el-descriptions-item>
                             <el-descriptions-item v-for="arg in info.args" :key="arg.field" :label="arg.description">
                                 <el-text>{{ info.kwargs[arg.field] }}</el-text>
                             </el-descriptions-item>
                         </el-descriptions>
                         <el-divider></el-divider>
-                        <el-descriptions title="执行操作" :column="1" border label-width="150px">
-                            <el-descriptions-item label="类型">{{ info.action.name }}</el-descriptions-item>
-                            <el-descriptions-item label="描述">{{ info.action.description }}</el-descriptions-item>
-                            <el-descriptions-item v-if="info.action.name === '合成物品'" label="合成目标">
+                        <el-descriptions :title="$t('automate_page.action_section')" :column="1" border label-width="150px">
+                            <el-descriptions-item :label="$t('automate_page.col_type')">{{ displayActionName(info.action) }}</el-descriptions-item>
+                            <el-descriptions-item :label="$t('automate_page.template_col_desc')">{{ info.action.description }}</el-descriptions-item>
+                            <el-descriptions-item v-if="isCraftAction(info.action)" :label="$t('automate_page.craft_target')">
                                 <ItemCard class="item-card-container" :item="{
                                     name: info.action.action_kwargs.item_name,
                                     damage: info.action.action_kwargs.item_damage,
@@ -113,8 +119,8 @@
                         </el-descriptions>
                         <el-divider></el-divider>
                         <el-text size="large">
-                            执行结果
-                            <TaskResult v-if="info.action.name === '合成物品' && info.result" :task_id="info.result.data" />
+                            {{ $t('automate_page.result') }}
+                            <TaskResult v-if="isCraftAction(info.action) && info.result" :task_id="info.result.data" />
                         </el-text>
                         <el-text size="large" v-if="info.result" style="width: 100%;">
                             <el-scrollbar>
@@ -122,19 +128,19 @@
                             </el-scrollbar>
                         </el-text>
                         <el-text size="large" v-else>
-                            无
+                            {{ $t('automate_page.none') }}
                         </el-text>
                     </el-space>
                 </div>
             </el-scrollbar>
         </el-dialog>
-        <!-- 添加自动化任务 -->
-        <el-dialog v-model="showAddTaskDialog" class="task-dialog" title="添加自动化任务" fullscreen align-center>
+        <!-- Add automation -->
+        <el-dialog v-model="showAddTaskDialog" class="task-dialog" :title="$t('automate_page.add_title')" fullscreen align-center>
             <el-scrollbar>
                 <div class="info-container">
                     <el-form :model="form" label-width="auto">
-                        <el-form-item label="触发条件" :required="true">
-                            <el-select-v2 v-model="form.name" placeholder="请选择触发条件" :options="options.name"
+                        <el-form-item :label="$t('automate_page.form_trigger')" :required="true">
+                            <el-select-v2 v-model="form.name" :placeholder="$t('automate_page.form_trigger_ph')" :options="options.name"
                                 @change="resetFormAndLoadActions()">
                                 <template #default="{ item }">
                                     <div
@@ -149,46 +155,46 @@
                                 </template>
                             </el-select-v2>
                         </el-form-item>
-                        <template v-if="form.name === 'CPU空闲时'">
-                            <el-form-item label="监听CPU" :required="true">
-                                <CpuSelect status="busy" footer="仅能选择已命名且繁忙的CPU" :options="options.cpuList"
+                        <template v-if="form.name === 'cpu_idle'">
+                            <el-form-item :label="$t('automate_page.watch_cpu')" :required="true">
+                                <CpuSelect status="busy" :footer="$t('automate_page.cpu_busy_footer')" :options="options.cpuList"
                                     :onlyNamed="true" @handleCpuSelected="onTriggerCpuSelected"
                                     @handleLoadCpuList="onLoadCpuList" />
                             </el-form-item>
-                            <el-form-item label="客户端ID">
-                                <el-tooltip effect="dark" content="不指定则留空" placement="top">
-                                    <el-input v-model="form.trigger_kwargs.client_id" placeholder="请输入客户端ID" />
+                            <el-form-item :label="$t('automate_page.client_id')">
+                                <el-tooltip effect="dark" :content="$t('automate_page.client_id_tip')" placement="top">
+                                    <el-input v-model="form.trigger_kwargs.client_id" :placeholder="$t('automate_page.client_id_ph')" />
                                 </el-tooltip>
                             </el-form-item>
-                            <el-form-item label="检测间隔" :required="true">
-                                <el-input-number v-model="form.interval" placeholder="检测间隔" :min="1" :max="3600">
+                            <el-form-item :label="$t('automate_page.poll_interval')" :required="true">
+                                <el-input-number v-model="form.interval" :placeholder="$t('automate_page.poll_interval')" :min="1" :max="3600">
                                     <template #suffix>
-                                        秒
+                                        {{ $t('automate_page.sec') }}
                                     </template>
                                 </el-input-number>
                             </el-form-item>
                         </template>
-                        <template v-if="form.name === '延迟任务'">
-                            <el-form-item label="延迟时间" :required="true">
-                                <el-input-number v-model="form.trigger_kwargs.delay" placeholder="延迟" :min="60"
+                        <template v-if="form.name === 'delay_timer'">
+                            <el-form-item :label="$t('automate_page.delay_label')" :required="true">
+                                <el-input-number v-model="form.trigger_kwargs.delay" :placeholder="$t('automate_page.delay_ph')" :min="60"
                                     :max="604800">
                                     <template #suffix>
-                                        秒
+                                        {{ $t('automate_page.sec') }}
                                     </template>
                                 </el-input-number>
                             </el-form-item>
                         </template>
-                        <template v-if="form.name === '定时任务'">
-                            <el-form-item label="定时时间" :required="true">
-                                <el-date-picker v-model="form.trigger_kwargs.time" type="datetime" placeholder="选择执行时间"
+                        <template v-if="form.name === 'scheduled_timer'">
+                            <el-form-item :label="$t('automate_page.schedule_label')" :required="true">
+                                <el-date-picker v-model="form.trigger_kwargs.time" type="datetime" :placeholder="$t('automate_page.schedule_ph')"
                                     :editable="false" value-format="YYYY-MM-DD HH:mm:ss" />
                             </el-form-item>
                         </template>
 
                         <!-- action -->
                         <template v-if="form.name">
-                            <el-form-item label="执行操作" :required="true">
-                                <el-select-v2 v-model="form.action" placeholder="请选择执行操作" :options="options.actions"
+                            <el-form-item :label="$t('automate_page.form_action')" :required="true">
+                                <el-select-v2 v-model="form.action" :placeholder="$t('automate_page.form_action_ph')" :options="options.actions"
                                     @change="onActionSelected">
                                     <template #default="{ item }">
                                         <div
@@ -207,21 +213,21 @@
                             <template v-if="form.action">
 
                                 <template v-if="form.action === 'craft'">
-                                    <el-form-item label="目标物品" :required="true">
-                                        <ItemSelect :options="options.itemList" :craft="true" footer="流体不支持中文搜索"
+                                    <el-form-item :label="$t('automate_page.target_item')" :required="true">
+                                        <ItemSelect :options="options.itemList" :craft="true" :footer="$t('automate_page.fluid_search_footer')"
                                             @handleLoadItemList="onLoadedItemList"
                                             @handleItemSelected="onActionItemSelected" />
                                     </el-form-item>
-                                    <el-form-item label="合成数量" :required="true">
-                                        <el-input-number v-model="form.action_kwargs.item_amount" placeholder="合成数量"
+                                    <el-form-item :label="$t('automate_page.craft_qty')" :required="true">
+                                        <el-input-number v-model="form.action_kwargs.item_amount" :placeholder="$t('automate_page.craft_qty_ph')"
                                             :min="1">
                                             <template #suffix>
-                                                个
+                                                {{ $t('automate_page.unit_count') }}
                                             </template>
                                         </el-input-number>
                                     </el-form-item>
-                                    <el-form-item label="指定CPU">
-                                        <el-tooltip effect="dark" content="如果请求合成时CPU繁忙，则合成失败" placement="top">
+                                    <el-form-item :label="$t('automate_page.cpu_optional')">
+                                        <el-tooltip effect="dark" :content="$t('automate_page.cpu_busy_tip')" placement="top">
                                             <CpuSelect status="all" footer="" :options="options.cpuList"
                                                 :onlyNamed="true" :autoSelect="true"
                                                 @handleCpuSelected="onActionCpuSelected"
@@ -231,50 +237,50 @@
                                 </template>
 
                                 <template v-if="form.action === 'http_request'">
-                                    <el-form-item label="请求方法" :required="true">
-                                        <el-select v-model="options.action_kwargs.method" placeholder="请选择请求方法">
+                                    <el-form-item :label="$t('automate_page.http_method')" :required="true">
+                                        <el-select v-model="options.action_kwargs.method" :placeholder="$t('automate_page.http_method_ph')">
                                             <el-option label="GET" value="GET" />
                                             <el-option label="POST" value="POST" />
                                             <el-option label="PUT" value="PUT" />
                                             <el-option label="DELETE" value="DELETE" />
                                         </el-select>
                                     </el-form-item>
-                                    <el-form-item label="请求地址" :required="true">
-                                        <el-input v-model="options.action_kwargs.url" placeholder="请输入请求地址" />
+                                    <el-form-item :label="$t('automate_page.http_url')" :required="true">
+                                        <el-input v-model="options.action_kwargs.url" :placeholder="$t('automate_page.http_url_ph')" />
                                     </el-form-item>
-                                    <el-form-item label="请求头">
+                                    <el-form-item :label="$t('automate_page.http_headers')">
                                         <div class="key-value-group"
                                             v-for="(item, index) in options.key_value_group.headers">
-                                            <el-input v-model="item.key" placeholder="请输入key" /> :
-                                            <el-input v-model="item.value" placeholder="请输入value" />
+                                            <el-input v-model="item.key" :placeholder="$t('automate_page.key_ph')" /> :
+                                            <el-input v-model="item.value" :placeholder="$t('automate_page.value_ph')" />
                                             <el-button type="danger"
                                                 @click="options.key_value_group.headers.splice(index, 1)">
-                                                删除
+                                                {{ $t('automate_page.remove_row') }}
                                             </el-button>
                                         </div>
                                         <el-button type="primary" size="small"
                                             @click="options.key_value_group.headers.push({ key: '', value: '' })">
-                                            添加
+                                            {{ $t('automate_page.add_row') }}
                                         </el-button>
                                     </el-form-item>
-                                    <el-form-item label="请求参数">
+                                    <el-form-item :label="$t('automate_page.http_params')">
                                         <div class="key-value-group"
                                             v-for="(item, index) in options.key_value_group.params">
-                                            <el-input v-model="item.key" placeholder="请输入key" /> :
-                                            <el-input v-model="item.value" placeholder="请输入value" />
+                                            <el-input v-model="item.key" :placeholder="$t('automate_page.key_ph')" /> :
+                                            <el-input v-model="item.value" :placeholder="$t('automate_page.value_ph')" />
                                             <el-button type="danger"
                                                 @click="options.key_value_group.params.splice(index, 1)">
-                                                删除
+                                                {{ $t('automate_page.remove_row') }}
                                             </el-button>
                                         </div>
                                         <el-button type="primary" size="small"
                                             @click="options.key_value_group.params.push({ key: '', value: '' })">
-                                            添加
+                                            {{ $t('automate_page.add_row') }}
                                         </el-button>
                                     </el-form-item>
-                                    <el-form-item label="请求体">
+                                    <el-form-item :label="$t('automate_page.http_body')">
                                         <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 6 }"
-                                            v-model="options.action_kwargs.data" placeholder="请输入请求体" />
+                                            v-model="options.action_kwargs.data" :placeholder="$t('automate_page.http_body')" />
                                     </el-form-item>
                                 </template>
                             </template>
@@ -282,22 +288,22 @@
 
                         <el-form-item v-if="form.name && form.action">
                             <el-button v-if="showUseTemplateButton" style="margin-right: auto;" type="primary"
-                                @click="this.showUseTemplateDialog = true">使用模板</el-button>
-                            <el-button style="margin-left: auto;" type="primary" @click="addAutoTask">添加</el-button>
+                                @click="this.showUseTemplateDialog = true">{{ $t('automate_page.use_template') }}</el-button>
+                            <el-button style="margin-left: auto;" type="primary" @click="addAutoTask">{{ $t('automate_page.add_btn') }}</el-button>
                         </el-form-item>
                     </el-form>
                 </div>
             </el-scrollbar>
         </el-dialog>
-        <!-- 使用模板 -->
-        <el-dialog v-model="showUseTemplateDialog" class="template-dialog" style="height: 400px;" title="使用模板"
+        <!-- Templates -->
+        <el-dialog v-model="showUseTemplateDialog" class="template-dialog" style="height: 400px;" :title="$t('automate_page.template_title')"
             align-center>
             <el-table :data="this.options.action_templates.options" :height="340" width="100%">
-                <el-table-column property="name" label="名称" />
-                <el-table-column property="description" label="描述" />
-                <el-table-column label="操作">
+                <el-table-column property="name" :label="$t('automate_page.template_col_name')" />
+                <el-table-column property="description" :label="$t('automate_page.template_col_desc')" />
+                <el-table-column :label="$t('automate_page.col_ops')">
                     <template #default="{ row }">
-                        <el-button type="primary" size="small" @click="comfirmUseTemplate(row)">使用</el-button>
+                        <el-button type="primary" size="small" @click="comfirmUseTemplate(row)">{{ $t('automate_page.template_use') }}</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -306,7 +312,7 @@
 </template>
 
 <script>
-import { h, inject } from 'vue';
+import { inject } from 'vue';
 import { trigger, timer, getActionTemplats } from '@/utils/automate'
 import ItemCard from "@/components/ItemCard.vue";
 import TaskResult from "@/components/TaskResult.vue";
@@ -314,21 +320,6 @@ import CpuSelect from "@/components/CpuSelect.vue";
 import ItemSelect from "@/components/ItemSelect.vue";
 import { ElMessage, ElTag, ElButton } from 'element-plus'
 import Setting from '@/utils/setting';
-
-const statusMap = {
-    "ready": {
-        text: "就绪",
-        type: "primary"
-    },
-    "pending": {
-        text: "运行中",
-        type: "success"
-    },
-    "completed": {
-        text: "已完成",
-        type: "warning"
-    },
-}
 
 export default {
     name: 'Automate',
@@ -341,7 +332,6 @@ export default {
     data() {
         return {
             backendUrl: Setting.get('backendUrl'),
-            statusMap,
             tasks: [],
             lastUpdate: "",
             mainLoading: false,
@@ -384,10 +374,53 @@ export default {
             isMobile,
         };
     },
+    computed: {
+        statusMap() {
+            return {
+                ready: { text: this.$t('automate_page.status.ready'), type: 'primary' },
+                pending: { text: this.$t('automate_page.status.pending'), type: 'success' },
+                completed: { text: this.$t('automate_page.status.completed'), type: 'warning' },
+            };
+        },
+    },
     methods: {
+        displayTaskType(type) {
+            if (type === 'trigger') return this.$t('automate_page.types.trigger');
+            if (type === 'timer') return this.$t('automate_page.types.timer');
+            return type || '';
+        },
+        displayCatalogName(name) {
+            if (!name) return '';
+            const key = `automate_page.names.${name}`;
+            const msg = this.$t(key);
+            return msg !== key ? msg : name;
+        },
+        translateCatalogDesc(item) {
+            if (!item || !item.name) return '';
+            const prefix = item.type === 'timer' ? 'automate_page.timer_desc.' : 'automate_page.trigger_desc.';
+            const key = `${prefix}${item.name}`;
+            const msg = this.$t(key);
+            if (msg !== key) return msg;
+            return item.description || '';
+        },
+        displayActionName(action) {
+            if (!action) return '';
+            const id = action.id;
+            if (id === 'craft' || id === 'http_request') {
+                const key = `automate_page.action_kind.${id}`;
+                const msg = this.$t(key);
+                if (msg !== key) return msg;
+            }
+            return action.name || '';
+        },
+        isCraftAction(action) {
+            if (!action || !action.action_kwargs) return false;
+            if (action.action_kwargs.item_name) return true;
+            return action.name === 'Craft item' || action.id === 'craft';
+        },
         async loadAutoTasks() {
             if (!this.backendUrl) {
-                this.$message.warning('后端地址未配置');
+                this.$message.warning(this.$t('info.backend_not_configured'));
                 return;
             }
 
@@ -399,13 +432,13 @@ export default {
                     new Promise((resolve, reject) => {
                         trigger.getTriggerList((data) => {
                             if (!data) {
-                                reject(new Error('获取触发器列表失败'));
+                                reject(new Error(this.$t('automate_page.errors.trigger_list')));
                                 return;
                             }
                             const triggerList = Object.entries(data).map(([key, value]) => ({
                                 ...value,
                                 id: key,
-                                type: "触发器"
+                                type: "trigger"
                             }));
                             resolve(triggerList);
                         });
@@ -413,13 +446,13 @@ export default {
                     new Promise((resolve, reject) => {
                         timer.getTimerList((data) => {
                             if (!data) {
-                                reject(new Error('获取定时器列表失败'));
+                                reject(new Error(this.$t('automate_page.errors.timer_list')));
                                 return;
                             }
                             const timerList = Object.entries(data).map(([key, value]) => ({
                                 ...value,
                                 id: key,
-                                type: "定时器"
+                                type: "timer"
                             }));
                             resolve(timerList);
                         });
@@ -431,7 +464,7 @@ export default {
                 });
                 this.lastUpdate = new Date().toLocaleString().replace(/\//g, '-');
             } catch (error) {
-                ElMessage.error(`加载任务失败: ${error.message || error}`);
+                ElMessage.error(this.$t('automateUi.load_tasks_failed', { detail: error.message || error }));
                 console.error('Error loading tasks:', error);
                 this.tasks = [];
             } finally {
@@ -444,69 +477,69 @@ export default {
             this.fetchActionTemplates();
         },
         addAutoTask() {
-            // 基本验证
+            // Basic validation
             if (!this.form.name || !this.form.action) {
-                ElMessage.error('请填写完整的触发条件和执行操作');
+                ElMessage.error(this.$t('automateUi.fill_condition_action'));
                 return;
             }
 
-            // 各类型特定验证
-            if (this.form.name === 'CPU空闲时') {
+            // Per-trigger-type validation
+            if (this.form.name === 'cpu_idle') {
                 if (!this.form.trigger_kwargs.cpu_name) {
-                    ElMessage.error('请选择监听的CPU');
+                    ElMessage.error(this.$t('automateUi.pick_cpu'));
                     return;
                 }
                 if (!this.form.interval || this.form.interval < 1) {
-                    ElMessage.error('请设置有效的检测间隔（至少1秒）');
+                    ElMessage.error(this.$t('automateUi.interval_seconds'));
                     return;
                 }
             }
 
-            if (this.form.name === '延迟任务') {
+            if (this.form.name === 'delay_timer') {
                 if (!this.form.trigger_kwargs.delay || this.form.trigger_kwargs.delay < 60) {
-                    ElMessage.error('延迟时间至少需要60秒');
+                    ElMessage.error(this.$t('automateUi.delay_min_60'));
                     return;
                 }
             }
 
-            if (this.form.name === '定时任务') {
+            if (this.form.name === 'scheduled_timer') {
                 if (!this.form.trigger_kwargs.time) {
-                    ElMessage.error('请选择定时时间');
+                    ElMessage.error(this.$t('automateUi.pick_schedule_time'));
                     return;
                 }
                 const selectedTime = new Date(this.form.trigger_kwargs.time);
                 const now = new Date();
                 if (selectedTime <= now) {
-                    ElMessage.warning('定时时间应该是未来的时间');
+                    ElMessage.warning(this.$t('automateUi.schedule_future'));
                     return;
                 }
             }
 
-            // 执行操作相关验证
+            // Action-specific validation
             if (this.form.action === 'craft') {
                 if (!this.form.action_kwargs.item_name) {
-                    ElMessage.error('请选择合成物品');
+                    ElMessage.error(this.$t('automateUi.pick_craft_item'));
                     return;
                 }
                 if (!this.form.action_kwargs.item_amount || this.form.action_kwargs.item_amount < 1) {
-                    ElMessage.error('请填写有效的合成数量（至少1个）');
+                    ElMessage.error(this.$t('automateUi.craft_amount_min'));
                     return;
                 }
             }
 
             if (this.form.action === 'http_request') {
-                // 验证JSON数据
+                // JSON body validation
                 if (this.options.action_kwargs.data && this.options.action_kwargs.data.trim()) {
                     try {
                         this.form.action_kwargs.data = JSON.parse(this.options.action_kwargs.data);
                     } catch (error) {
-                        ElMessage.error('请求体必须是有效的JSON格式');
+                        ElMessage.error(this.$t('automateUi.json_body_invalid'));
                         console.error('Error parsing JSON:', error);
                         return;
                     }
                 }
 
-                // 处理请求头
+                // Normalize headers
                 if (this.options.key_value_group.headers && this.options.key_value_group.headers.length) {
                     const headers = {};
                     const invalidHeaders = [];
@@ -520,7 +553,7 @@ export default {
                     });
 
                     if (invalidHeaders.length > 0) {
-                        ElMessage.warning(`发现 ${invalidHeaders.length} 个无效的请求头（键或值为空）`);
+                        ElMessage.warning(this.$t('automateUi.invalid_headers', { n: invalidHeaders.length }));
                     }
 
                     if (Object.keys(headers).length > 0) {
@@ -528,7 +561,7 @@ export default {
                     }
                 }
 
-                // 处理URL参数
+                // Normalize query params
                 if (this.options.key_value_group.params && this.options.key_value_group.params.length) {
                     const params = {};
                     const invalidParams = [];
@@ -542,7 +575,7 @@ export default {
                     });
 
                     if (invalidParams.length > 0) {
-                        ElMessage.warning(`发现 ${invalidParams.length} 个无效的URL参数（键或值为空）`);
+                        ElMessage.warning(this.$t('automateUi.invalid_params', { n: invalidParams.length }));
                     }
 
                     if (Object.keys(params).length > 0) {
@@ -550,50 +583,50 @@ export default {
                     }
                 }
 
-                // 必填字段验证
+                // Required field checks
                 if (!this.options.action_kwargs.url) {
-                    ElMessage.error('请求地址不能为空');
+                    ElMessage.error(this.$t('automateUi.url_required'));
                     return;
                 }
 
                 if (!this.options.action_kwargs.method) {
-                    ElMessage.error('请求方法不能为空');
+                    ElMessage.error(this.$t('automateUi.method_required'));
                     return;
                 }
 
-                // 验证URL格式
+                // URL shape sanity check
                 try {
                     new URL(this.options.action_kwargs.url);
                 } catch (e) {
-                    ElMessage.warning('请求地址格式可能不正确，请确认');
+                    ElMessage.warning(this.$t('automateUi.url_suspicious'));
                 }
 
                 this.form.action_kwargs.method = this.options.action_kwargs.method;
                 this.form.action_kwargs.url = this.options.action_kwargs.url;
             }
 
-            // 查找触发器类型
+            // Resolve trigger type metadata
             const configItem = this.config.find(item => item.name === this.form.name);
             if (!configItem) {
-                ElMessage.error('无效的触发条件');
+                ElMessage.error(this.$t('automateUi.invalid_trigger'));
                 return;
             }
 
-            // 提交任务
+            // Submit to API
             const type = configItem.type;
-            ElMessage.info('正在添加任务，请稍候...');
+            ElMessage.info(this.$t('automateUi.adding_wait'));
             this.submitTask(type, this.form);
         },
         submitTask(type, form) {
-            if (type === '触发器') {
+            if (type === 'trigger') {
                 trigger.addTrigger(form, (res) => {
-                    ElMessage.success('任务添加成功');
+                    ElMessage.success(this.$t('automateUi.task_added'));
                     this.showAddTaskDialog = false;
                     this.loadAutoTasks();
                 });
             } else {
                 timer.addTimer(form, (res) => {
-                    ElMessage.success('任务添加成功');
+                    ElMessage.success(this.$t('automateUi.task_added'));
                     this.showAddTaskDialog = false;
                     this.loadAutoTasks();
                 });
@@ -604,20 +637,20 @@ export default {
                 new Promise((resolve, reject) => {
                     trigger.getTriggerConfig((data) => {
                         if (!data) {
-                            reject(new Error('无法获取触发器配置'));
+                            reject(new Error(this.$t('automate_page.errors.trigger_cfg')));
                             return;
                         }
-                        const triggerConfig = data.map(item => ({ ...item, type: '触发器' }));
+                        const triggerConfig = data.map(item => ({ ...item, type: 'trigger' }));
                         resolve(triggerConfig);
                     });
                 }),
                 new Promise((resolve, reject) => {
                     timer.getTimerConfig((data) => {
                         if (!data) {
-                            reject(new Error('无法获取定时器配置'));
+                            reject(new Error(this.$t('automate_page.errors.timer_cfg')));
                             return;
                         }
-                        const timerConfig = data.map(item => ({ ...item, type: '定时器' }));
+                        const timerConfig = data.map(item => ({ ...item, type: 'timer' }));
                         resolve(timerConfig);
                     });
                 })
@@ -625,32 +658,32 @@ export default {
             .then(([triggerConfig, timerConfig]) => {
                 this.config = [...triggerConfig, ...timerConfig];
                 
-                // 整理选项列表
+                // Build select options from template
                 this.options.name = [
                     {
-                        label: '触发器',
-                        options: triggerConfig.map(item => ({ 
-                            label: item.name, 
-                            value: item.name, 
-                            desc: item.description 
+                        label: this.$t('automate_page.group.trigger'),
+                        options: triggerConfig.map(item => ({
+                            label: this.displayCatalogName(item.name),
+                            value: item.name,
+                            desc: this.translateCatalogDesc(item),
                         }))
-                    }, 
+                    },
                     {
-                        label: '定时器',
-                        options: timerConfig.map(item => ({ 
-                            label: item.name, 
-                            value: item.name, 
-                            desc: item.description 
+                        label: this.$t('automate_page.group.timer'),
+                        options: timerConfig.map(item => ({
+                            label: this.displayCatalogName(item.name),
+                            value: item.name,
+                            desc: this.translateCatalogDesc(item),
                         }))
                     }
                 ];
 
-                // 预处理默认参数
+                // Default kwargs from template
                 this.args.trigger = {};
                 this.args.action = {};
                 
                 this.config.forEach(item => {
-                    // 存储触发器默认参数
+                    // Persist trigger defaults
                     this.args.trigger[item.name] = {};
                     if (item.args && Array.isArray(item.args)) {
                         item.args.forEach(arg => {
@@ -660,7 +693,7 @@ export default {
                         });
                     }
                     
-                    // 存储操作默认参数
+                    // Persist action defaults
                     this.args.action[item.name] = {};
                     if (item.actions && Array.isArray(item.actions)) {
                         item.actions.forEach(action => {
@@ -677,20 +710,20 @@ export default {
                 });
             })
             .catch((error) => {
-                ElMessage.error(`加载任务配置失败: ${error.message || error}`);
+                ElMessage.error(this.$t('automateUi.load_config_failed', { detail: error.message || error }));
                 console.error('Error loading task config:', error);
             });
         },
         fetchActionTemplates() {
             getActionTemplats((data) => {
                 if (!data) {
-                    ElMessage.warning('获取模板数据失败');
+                    ElMessage.warning(this.$t('automateUi.template_fetch_warn'));
                     return;
                 }
                 
                 this.options.action_templates.data = data;
                 
-                // 转换模板数据为选项列表
+                // Map template rows to option list
                 const options = [];
                 for (const trigger_name in data) {
                     for (const action_name in data[trigger_name]) {
@@ -699,7 +732,7 @@ export default {
                                 trigger_name,
                                 action_name,
                                 template_name: action_name,
-                                description: data[trigger_name][action_name].description || '无描述',
+                                description: data[trigger_name][action_name].description || this.$t('automate_page.none'),
                                 name: action_name
                             });
                         }
@@ -711,51 +744,51 @@ export default {
         },
         handleStart(data) {
             if (!data || !data.id) {
-                ElMessage.error('任务数据无效');
+                ElMessage.error(this.$t('automateUi.task_invalid'));
                 return;
             }
             
-            if (data.type === '定时器') {
+            if (data.type === 'timer') {
                 timer.startTimer(data.id, (res) => {
-                    ElMessage.success('任务启动成功');
+                    ElMessage.success(this.$t('automateUi.task_started'));
                     this.loadAutoTasks();
                 });
             } else {
                 trigger.startTrigger(data.id, (res) => {
-                    ElMessage.success('任务启动成功');
+                    ElMessage.success(this.$t('automateUi.task_started'));
                     this.loadAutoTasks();
                 });
             }
         },
         handleStop(data) {
             if (!data || !data.id) {
-                ElMessage.error('任务数据无效');
+                ElMessage.error(this.$t('automateUi.task_invalid'));
                 return;
             }
 
-            if (data.type === '定时器') {
+            if (data.type === 'timer') {
                 timer.stopTimer(data.id, (res) => {
-                    ElMessage.success('任务停止成功');
+                    ElMessage.success(this.$t('automateUi.task_stopped'));
                     this.loadAutoTasks();
                 });
             } else {
                 trigger.stopTrigger(data.id, (res) => {
-                    ElMessage.success('任务停止成功');
+                    ElMessage.success(this.$t('automateUi.task_stopped'));
                     this.loadAutoTasks();
                 });
             }
         },
         handleInfo(data) {
             if (!data) {
-                ElMessage.error('任务数据无效');
+                ElMessage.error(this.$t('automateUi.task_invalid'));
                 return;
             }
             
-            // 安全地格式化时间
+            // Format timeline fields defensively
             try {
                 const formattedData = { ...data };
                 
-                // 复制并格式化时间数据
+                // Clone before mutating dates for display
                 if (formattedData.time) {
                     formattedData.time = { ...formattedData.time };
                     Object.keys(formattedData.time).forEach(key => {
@@ -767,7 +800,7 @@ export default {
                                 .toLocaleString()
                                 .replace(/\//g, '-');
                         } catch (e) {
-                            console.warn(`无法格式化时间 ${key}:`, e);
+                            console.warn(`Could not format time field ${key}:`, e);
                         }
                     });
                 }
@@ -775,19 +808,19 @@ export default {
                 this.info = formattedData;
                 this.showInfoDialog = true;
             } catch (error) {
-                console.error('处理任务详情时出错:', error);
-                ElMessage.error('无法显示任务详情');
+                console.error('Task detail handling failed:', error);
+                ElMessage.error(this.$t('automateUi.task_detail_unavailable'));
             }
         },
         handleRemove(data) {
-            if (data.type === '定时器') {
+            if (data.type === 'timer') {
                 timer.removeTimer(data.id, (res) => {
-                    ElMessage.success('任务移除成功');
+                    ElMessage.success(this.$t('automateUi.task_removed'));
                     this.loadAutoTasks();
                 });
             } else {
                 trigger.removeTrigger(data.id, (res) => {
-                    ElMessage.success('任务移除成功');
+                    ElMessage.success(this.$t('automateUi.task_removed'));
                     this.loadAutoTasks();
                 });
             }
@@ -800,12 +833,12 @@ export default {
                 action_kwargs: {},
             };
             if (this.form.name) {
-                if (this.config.find(item => item.name === this.form.name).type === '触发器') {
+                if (this.config.find(item => item.name === this.form.name).type === 'trigger') {
                     this.form.interval = 180;
                 }
                 this.loadDefaultTriggerArgs(this.form.name);
                 this.options.actions = this.config.find(item => item.name === this.form.name).actions.map(action => ({
-                    label: action.name,
+                    label: this.displayActionName(action),
                     value: action.id,
                     desc: action.description,
                 }));
@@ -862,22 +895,22 @@ export default {
         },
         comfirmUseTemplate(template) {
             if (!template) {
-                ElMessage.warning('无效的模板');
+                ElMessage.warning(this.$t('automateUi.template_invalid'));
                 return;
             }
             
             try {
-                // 处理键值对模板数据
+                // Key/value template branch
                 const key_value_fields = template.args && template.args.key_values;
                 
-                // 清空现有的键值对组
+                // Reset key/value groups
                 if (this.options.key_value_group) {
                     Object.keys(this.options.key_value_group).forEach(field => {
                         this.options.key_value_group[field] = [];
                     });
                 }
                 
-                // 存在则将template.action_kwargs中的key_value字段添加到options.key_value_group中
+                // Merge template key_value into options.key_value_group when present
                 if (key_value_fields && Array.isArray(key_value_fields)) {
                     key_value_fields.forEach(field => {
                         if (!this.options.key_value_group[field]) {
@@ -893,18 +926,18 @@ export default {
                                 });
                             }
                             
-                            // 去除template.action_kwargs中的key_value字段
+                            // Drop key_value from template.action_kwargs after merge
                             delete template.action_kwargs[field];
                         }
                     });
                 }
                 
-                // 复制模板参数到表单
+                // Copy remaining template kwargs into the form
                 this.options.action_kwargs = { ...template.action_kwargs };
-                ElMessage.success('模板应用成功');
+                ElMessage.success(this.$t('automateUi.template_applied'));
             } catch (error) {
-                console.error('应用模板时出错:', error);
-                ElMessage.error('应用模板失败');
+                console.error('Apply template failed:', error);
+                ElMessage.error(this.$t('automateUi.template_apply_failed'));
             }
             
             this.showUseTemplateDialog = false;

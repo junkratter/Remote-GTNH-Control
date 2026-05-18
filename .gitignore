@@ -3,9 +3,20 @@ __pycache__/
 *$py.class
 .idea/
 .vscode/
+.venv/
+*.egg-info/
 
 tasks/
 data/
+server/data/
+server/.env
+oc-client/env.lua
+tools/deploy/robots.seed.json
+*.sqlite
+*.sqlite.bak-*
+server/openapi.json
+website/src/api/openapi.json
+website/src/api/generated/*.d.ts
 
 # Logs
 logs
@@ -15,6 +26,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+tools/bg-lang-pack
+tools/deploy
+tools/kb-fetch
+kb/05-*
 
 node_modules
 dist

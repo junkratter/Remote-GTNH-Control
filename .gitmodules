@@ -1,0 +1,9 @@
+[submodule "kb/05-vendored/RemoteOC-GTNH-AE2"]
+	path = kb/05-vendored/RemoteOC-GTNH-AE2
+	url = https://github.com/z5882852/RemoteOC-GTNH-AE2
+[submodule "kb/05-vendored/nesql-exporter"]
+	path = kb/05-vendored/nesql-exporter
+	url = https://github.com/GTNewHorizons/nesql-exporter.git
+[submodule "kb/05-vendored/OpenComputers-GTNH"]
+	path = kb/05-vendored/OpenComputers-GTNH
+	url = https://github.com/GTNewHorizons/OpenComputers

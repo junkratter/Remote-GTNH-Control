@@ -1,94 +1,153 @@
 <template>
-    <div>
-        <el-form label-position="left" label-width="auto" style="max-width: 600px; margin: 20px;">
-            <el-space fill style="width: 100%; margin-bottom: 5px;">
-                <el-alert type="info" show-icon :closable="false">
-                    <p>该页面内容请勿泄露给他人，所有配置信息将保存至本地 (localStorage)</p>
-                </el-alert>
-            </el-space>
-            <div v-for="(config, index) in configItems" :key="index">
-                <el-form-item :label="config.name">
+    <div class="page">
+        <header class="page__header">
+            <h2>{{ t('settings.title') }}</h2>
+        </header>
+
+        <el-alert
+            type="info"
+            show-icon
+            :closable="false"
+            :title="t('settings.alert')"
+        />
+
+        <el-form
+            label-position="top"
+            class="page-settings__form glass-card"
+        >
+            <template v-for="(config, idx) in configItems" :key="idx">
+                <el-divider
+                    v-if="config.type === 'title'"
+                    content-position="left"
+                >
+                    {{ t(`settings.section.${config.i18nKey}`) }}
+                </el-divider>
+
+                <el-form-item
+                    v-else
+                    :label="t(`settings.fields.${config.field}.label`)"
+                >
                     <template v-if="config.type === 'input'">
-                        <el-input v-model="configValues[config.field]" :placeholder="config.placeholder"></el-input>
+                        <el-input
+                            v-model="configValues[config.field]"
+                            :placeholder="te(`settings.fields.${config.field}.placeholder`)
+                                ? t(`settings.fields.${config.field}.placeholder`)
+                                : ''"
+                        />
                     </template>
-                    <template v-else-if="config.type === 'checkbox' && config.tooltip">
-                        <el-tooltip effect="dark" placement="bottom" raw-content :content="config.tooltip">
-                            <el-checkbox v-model="configValues[config.field]"></el-checkbox>
-                        </el-tooltip>
-                    </template>
-                    <template v-else-if="config.type === 'checkbox'">
-                        <el-checkbox v-model="configValues[config.field]"></el-checkbox>
-                    </template>
+
                     <template v-else-if="config.type === 'password'">
-                        <el-input v-model="configValues[config.field]" type="password" show-password
-                            :placeholder="config.placeholder"></el-input>
+                        <el-input
+                            v-model="configValues[config.field]"
+                            type="password"
+                            show-password
+                            :placeholder="te(`settings.fields.${config.field}.placeholder`)
+                                ? t(`settings.fields.${config.field}.placeholder`)
+                                : ''"
+                        />
                     </template>
+
                     <template v-else-if="config.type === 'segmented'">
-                        <el-segmented v-model="configValues[config.field]" :options="config.options" />
+                        <el-segmented
+                            v-model="configValues[config.field]"
+                            :options="segmentedOptions(config)"
+                        />
                     </template>
-                    <template v-else-if="config.type === 'title'">
-                        <el-divider content-position="left" size="large">{{ config.title }}</el-divider>
+
+                    <template v-else-if="config.type === 'checkbox'">
+                        <el-tooltip
+                            v-if="te(`settings.fields.${config.field}.tooltip`)"
+                            effect="dark"
+                            placement="bottom"
+                            raw-content
+                            :content="t(`settings.fields.${config.field}.tooltip`)"
+                        >
+                            <el-checkbox v-model="configValues[config.field]" />
+                        </el-tooltip>
+                        <el-checkbox v-else v-model="configValues[config.field]" />
                     </template>
                 </el-form-item>
-            </div>
-            <el-form-item label="暗色模式">
-                <el-switch v-model="isDark" @change="toggleDark">
+            </template>
+
+            <el-form-item :label="t('settings.dark_mode')">
+                <el-switch
+                    v-model="isDark"
+                    @change="toggleDark"
+                    inline-prompt
+                >
                     <template #active-action>
-                        <el-icon>
-                            <Moon />
-                        </el-icon>
+                        <el-icon><Moon /></el-icon>
                     </template>
                     <template #inactive-action>
-                        <el-icon>
-                            <Sunny />
-                        </el-icon>
+                        <el-icon><Sunny /></el-icon>
                     </template>
                 </el-switch>
             </el-form-item>
+
+            <el-form-item :label="t('settings.language')">
+                <LangSwitcher />
+            </el-form-item>
+
             <el-form-item>
-                <el-button type="primary" @click="saveSettings">保存</el-button>
+                <el-button type="primary" @click="saveSettings">
+                    {{ t('common.save') }}
+                </el-button>
             </el-form-item>
         </el-form>
     </div>
 </template>
 
-<script>
-import Setting from '@/utils/setting';
-import { useDark, useToggle } from '@vueuse/core'
+<script setup>
+import { reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { ElMessageBox } from 'element-plus';
+import { useDark, useToggle } from '@vueuse/core';
 
-export default {
-    name: 'Settings',
-    setup() {
-        const isDark = useDark();
-        const toggleDark = useToggle(isDark);
-        return {
-            isDark,
-            toggleDark,
-        };
-    },
-    data() {
-        const defaultConfigItems = Setting.defaultConfigItems;
-        const initialConfigValues = Setting.getAll();
-        return {
-            configItems: defaultConfigItems,
-            configValues: initialConfigValues,
-        };
-    },
-    methods: {
-        saveSettings() {
-            this.$confirm('是否刷新网页以应用更改？', '确认', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+import Setting from '@/utils/setting';
+import LangSwitcher from '@/components/LangSwitcher.vue';
+
+const { t, te } = useI18n();
+
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
+
+const configItems = Setting.defaultConfigItems;
+const configValues = reactive(Setting.getAll());
+
+function segmentedOptions(config) {
+    if (config.optionsI18nKey) {
+        return (config.options || []).map((value) => ({
+            value,
+            label: t(`settings.segments.${config.optionsI18nKey}.${value}`),
+        }));
+    }
+    return config.options || [];
+}
+
+async function saveSettings() {
+    try {
+        await ElMessageBox.confirm(
+            t('settings.confirm_reload'),
+            t('common.confirm'),
+            {
+                confirmButtonText: t('common.confirm'),
+                cancelButtonText: t('common.cancel'),
                 type: 'warning',
-            }).then(() => {
-                Object.keys(this.configValues).forEach(field => {
-                    Setting.set(field, this.configValues[field]);
-                });
-                location.reload();
-            }).catch(() => {
-                console.log('取消保存');
-            });
-        },
-    },
-};
+            },
+        );
+    } catch {
+        return;
+    }
+    Object.keys(configValues).forEach((field) => {
+        Setting.set(field, configValues[field]);
+    });
+    location.reload();
+}
 </script>
+
+<style scoped>
+.page-settings__form {
+    max-width: 720px;
+    width: 100%;
+}
+</style>

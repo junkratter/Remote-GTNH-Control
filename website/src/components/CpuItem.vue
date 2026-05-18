@@ -1,7 +1,7 @@
 <template>
     <el-space alignment="center" :size="8">
-        <el-tag disable-transitions v-if="item.busy" type="warning" effect="light">繁忙</el-tag>
-        <el-tag disable-transitions v-else type="success" effect="light">空闲</el-tag>
+        <el-tag disable-transitions v-if="item.busy" type="warning" effect="light">{{ $t('cpu.busy') }}</el-tag>
+        <el-tag disable-transitions v-else type="success" effect="light">{{ $t('cpu.idle') }}</el-tag>
         <span>{{ item.name }} </span>
         <template v-if="item.output && item.output.name">
             <el-image :src="item.output.image || ''" class="component-image-select" :alt="item.output.title">
@@ -37,7 +37,7 @@ export default {
 
 <style scoped>
 .unknow-icon {
-    /* 居中 */
+    /* Center */
     position: absolute;
     top: 50%;
     left: 50%;

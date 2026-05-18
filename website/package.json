@@ -1,11 +1,15 @@
 {
-  "name": "remote-oc-gtnh-ae2-website",
+  "name": "gtnh-cyber-website",
   "private": true,
-  "version": "1.2.7",
+  "version": "2.0.0",
   "scripts": {
     "dev": "vite --port 80 --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{vue,js,ts}\"",
+    "openapi:fetch": "node scripts/openapi-fetch.mjs",
+    "openapi:generate": "openapi-typescript src/api/openapi.json -o src/api/generated/schema.d.ts",
+    "openapi": "npm run openapi:generate"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -13,15 +17,24 @@
     "axios": "^1.7.2",
     "echarts": "^5.5.1",
     "element-plus": "^2.9.2",
+    "leaflet": "^1.9.4",
+    "openapi-fetch": "^0.13.1",
     "pako": "^2.1.0",
-    "vue": "^3.2.25",
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
     "vue-echarts": "^7.0.3",
+    "vue-i18n": "^9.14.2",
     "vue-router": "4",
     "vue3-eventbus": "^2.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^2.3.3",
-    "vite": "^2.9.9",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/eslint-config-typescript": "^14.1.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "openapi-typescript": "^7.4.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3",
     "vite-plugin-compression": "^0.5.1"
   }
 }

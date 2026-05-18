@@ -4,12 +4,12 @@
             <el-card class="control-card" shadow="hover">
                 <div class="control-bar">
                     <div class="control-info">
-                        <span>最近更新时间: {{ lastCpuUpdate }}</span>
-                        <el-button type="primary" @click="getCpuList">获取CPU信息</el-button>
+                        <span>{{ $t('cpu.last_update') }}: {{ lastCpuUpdate }}</span>
+                        <el-button type="primary" @click="getCpuList">{{ $t('cpu.get_info') }}</el-button>
                     </div>
                     <div v-if="isMobile" class="cpu-select-container">
                         <el-select-v2 v-model="selectCpu" :options="cpuList" :props="selectProps"
-                            @change="handleCpuSelect" placeholder="请选择CPU" style="width: 100%">
+                            @change="handleCpuSelect" :placeholder="$t('cpu.select')" style="width: 100%">
                             <template #default="{ item }">
                                 <CpuItem :item="item" />
                             </template>
@@ -31,12 +31,12 @@
                                     <div class="cpu-row">
                                         <div class="cpu-info">
                                             <div class="ellipsis">{{ cpu.name }}</div>
-                                            <h1>状态:
-                                                <el-tag v-if="cpu.busy" type="warning" effect="light">繁忙</el-tag>
-                                                <el-tag v-else type="success" effect="light">空闲</el-tag>
+                                            <h1>{{ $t('cpu.status') }}:
+                                                <el-tag v-if="cpu.busy" type="warning" effect="light">{{ $t('cpu.busy') }}</el-tag>
+                                                <el-tag v-else type="success" effect="light">{{ $t('cpu.idle') }}</el-tag>
                                             </h1>
-                                            <h1>可存储: {{ cpu.storage / 1024 }} KB</h1>
-                                            <h1>并行: {{ cpu.coprocessors }}</h1>
+                                            <h1>{{ $t('cpu.storage') }}: {{ cpu.storage / 1024 }} KB</h1>
+                                            <h1>{{ $t('cpu.coprocessors') }}: {{ cpu.coprocessors }}</h1>
                                         </div>
                                         <div class="cpu-output">
                                             <img v-if="cpu.output.image" :src="cpu.output.image" alt="output"
@@ -72,13 +72,13 @@
                                         </el-image>
                                         <div class="item-info">
                                             <div class="ellipsis" style="font-size: 20px;">{{ item.label }}</div>
-                                            <div v-if="item.active">正在合成:
+                                            <div v-if="item.active">{{ $t('cpu.crafting') }}:
                                                 <NumberFormat :number="item.active" />
                                             </div>
-                                            <div v-if="item.pending">计划合成:
+                                            <div v-if="item.pending">{{ $t('cpu.planned') }}:
                                                 <NumberFormat :number="item.pending" />
                                             </div>
-                                            <div v-if="item.stored">现存:
+                                            <div v-if="item.stored">{{ $t('cpu.stored') }}:
                                                 <NumberFormat :number="item.stored" />
                                             </div>
                                         </div>
@@ -86,7 +86,7 @@
                                 </el-card>
                             </el-col>
                         </el-row>
-                        <el-empty v-else description="没有物品" />
+                        <el-empty v-else :description="$t('cpu.no_items')" />
                     </el-card>
                 </el-col>
             </el-row>
@@ -113,7 +113,7 @@ export default {
         return {
             loading: true,
             headerLoading: false,
-            headerLoadingText: "请求已发送，等待客户端响应... Task id: getCpuDetailList",
+            headerLoadingText: "",
             lastCpuUpdate: "",
             cpuList: [],
             currentCpu: { items: [] },
@@ -135,7 +135,8 @@ export default {
         };
     },
     mounted() {
-        this.startPolling("getCpuDetailList");
+        this.headerLoadingText = this.$t('cpu.request_sent', { task: 'getCpuDetailList' });
+        this.getCpuList();
         bus.on('refreshCpuList', this.handleTaskResult);
     },
     beforeUnmount() {
@@ -170,7 +171,7 @@ export default {
         parseItemStack(data) {
             const itemArray = [];
 
-            // 合并相同物品
+            // Merge identical items for display
             const mergeItems = (array, newItem) => {
                 const existingItem = array.find(item =>
                     item.label === newItem.label &&
@@ -185,7 +186,7 @@ export default {
                 }
             };
 
-            // 处理 activeItems
+            // activeItems
             data.activeItems.forEach(item => {
                 let item_ = itemUtil.getItem(item);
                 mergeItems(itemArray, {
@@ -199,7 +200,7 @@ export default {
                 });
             });
 
-            // 处理 pendingItems
+            // pendingItems
             data.pendingItems.forEach(item => {
                 let item_ = itemUtil.getItem(item);
                 mergeItems(itemArray, {
@@ -213,7 +214,7 @@ export default {
                 });
             });
 
-            // 处理 storedItems
+            // storedItems
             data.storedItems.forEach(item => {
                 let item_ = itemUtil.getItem(item);
                 mergeItems(itemArray, {
@@ -233,9 +234,6 @@ export default {
             let item_ = itemUtil.getItem(item);
             item['image'] = itemUtil.getItemIcon(item_);
             item['title'] = itemUtil.getName(item_, item);
-            if (item.name === 'minecraft:paper' && item.label !== 'Paper' && item.title === '纸') {
-                item.title = `${item.title}(${item.label})`;
-            }
             return item;
         },
         handleTaskResult(data) {
@@ -247,11 +245,11 @@ export default {
                     let result = JSON.parse(data.result[0]);
 
                     if (result.message === undefined || result.message !== 'success') {
-                        this.$message.warning(result.message ? result.message : "未知错误");
+                        this.$message.warning(result.message ? result.message : this.$t('common.unknown_error'));
                         return
                     }
 
-                    this.lastCpuUpdate = data.completed_time ? data.completed_time.split(".")[0].replace("T", " ") : '未知';
+                    this.lastCpuUpdate = data.completed_time ? data.completed_time.split(".")[0].replace("T", " ") : this.$t('common.unknown');
 
                     const previousCpuName = this.currentCpu?.name;
                     this.currentCpu = { name: undefined, items: [] };
@@ -275,12 +273,12 @@ export default {
                         });
                     }
 
-                    // cpuList按名字排序
+                    // Sort CPUs by name
                     cpuList.sort((a, b) => a.name.localeCompare(b.name));
-                    // 给每个CPU添加id，递增
+                    // Stable row ids
                     cpuList.forEach((cpu, index) => {
                         cpu.id = index;
-                        // 还原选择的CPU
+                        // Restore previous selection when possible
                         if (previousCpuName && previousCpuName === cpu.name) {
                             this.currentCpu = cpu;
                             this.cpuSelected = index;
@@ -288,7 +286,7 @@ export default {
                         }
                     });
 
-                    // 当选择的CPU不存在默认选择第一个CPU
+                    // Default to first CPU if selection missing
                     if (!this.currentCpu.name) {
                         this.currentCpu = cpuList[0];
                         this.cpuSelected = 0;
@@ -300,7 +298,7 @@ export default {
                     this.$message.warning(e);
                 }
             } else {
-                this.$message.warning(`返回数据为空!`);
+                this.$message.warning(this.$t('common.empty_response'));
             }
         },
         handleTaskComplete() {
@@ -445,7 +443,7 @@ export default {
 
 .box-card::-webkit-scrollbar {
     display: none;
-    /* 隐藏滚动条 */
+    /* Hide scrollbar */
 }
 
 .cpu-row {
@@ -473,7 +471,7 @@ export default {
 @media (max-width: 1300px) {
     .cpu-output .output-image {
         display: none;
-        /* 隐藏 cpu-output */
+        /* Hide cpu-output on narrow viewports */
     }
 }
 
@@ -502,7 +500,7 @@ export default {
 }
 
 .unknow-icon {
-    /* 居中 */
+    /* Center */
     position: absolute;
     top: 50%;
     left: 50%;
@@ -525,7 +523,7 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* 让信息块顶部对齐 */
+    /* Align info blocks to the top */
     width: calc(100% - 60px);
     line-height: 1.5;
 }

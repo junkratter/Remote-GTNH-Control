@@ -8,16 +8,16 @@
             </template>
             <template #description>
                 <el-space direction="vertical" :size="16">
-                    <el-text class="error-title" size="large">数据加载失败</el-text>
-                    <el-text class="error-message" type="danger">{{ errorMessage }}</el-text>
-                    <el-text class="error-hint" type="info">请检查数据源是否正确配置</el-text>
+                    <el-text class="error-title" size="large">{{ $t('error_display.title') }}</el-text>
+                    <el-text class="error-message" type="danger">{{ errorMessage || $t('error_display.unknown') }}</el-text>
+                    <el-text class="error-hint" type="info">{{ $t('error_display.hint') }}</el-text>
                 </el-space>
             </template>
             <el-button type="primary" @click="handleRefresh">
                 <el-icon style="margin-right: 4px;">
                     <Refresh />
                 </el-icon>
-                刷新页面
+                {{ $t('error_display.refresh') }}
             </el-button>
         </el-empty>
     </div>
@@ -29,7 +29,7 @@ export default {
     props: {
         errorMessage: {
             type: String,
-            default: '未知错误'
+            default: ''
         }
     },
     methods: {

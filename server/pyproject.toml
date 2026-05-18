@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gtnh-cyber-backend"
+version = "2.0.0"
+description = "Backend for GTNH Cyber Supervisor (RemoteOC-GTNH-AE2 fork)."
+requires-python = ">=3.11"
+readme = "../README.md"
+authors = [{ name = "gtnh-cyber" }]
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

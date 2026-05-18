@@ -14,7 +14,7 @@
         </el-statistic>
         <div class="statistic-footer">
             <div class="footer-item">
-                <span>相较于上一次数据</span>
+                <span>{{ $t('monitor.vs_previous') }}</span>
                 <span v-if="change >= 0" class="green">
                     {{ (Math.abs(change) * 100).toFixed(2) }}%
                     <el-icon>
@@ -66,11 +66,11 @@ export default {
             if (this.formatter) {
                 return this.formatter;
             }
-            // 显示完整数字格式
+            // Full-precision numeric display
             return (value) => {
                 const num = value.value;
                 if (num === null || num === undefined) return '-';
-                // 使用 toLocaleString 显示完整数字，最大支持 20 位有效数字
+                // toLocaleString, up to ~20 significant digits
                 console.log(num, num.toLocaleString('zh-CN', { maximumFractionDigits: 0 }));
                 return num.toLocaleString('zh-CN', { maximumFractionDigits: 0 });
             };

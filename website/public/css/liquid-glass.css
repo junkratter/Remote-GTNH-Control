@@ -1,0 +1,474 @@
+/* =========================================================================
+   Liquid Glass theme for gtnh-cyber.
+   Adds glassmorphic surfaces, aurora background, and a responsive scaffold
+   on top of Element Plus 2.x.
+   ========================================================================= */
+
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.42);
+    --glass-bg-strong: rgba(255, 255, 255, 0.62);
+    --glass-bg-weak: rgba(255, 255, 255, 0.18);
+    --glass-border: rgba(255, 255, 255, 0.55);
+    --glass-border-soft: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 10px 30px rgba(31, 38, 135, 0.18);
+    --glass-shadow-strong: 0 18px 48px rgba(31, 38, 135, 0.25);
+    --glass-blur: 22px;
+    --glass-saturate: 160%;
+    --glass-radius: 18px;
+    --glass-radius-sm: 12px;
+
+    --aurora-1: rgba(149, 191, 255, 0.7);
+    --aurora-2: rgba(255, 182, 219, 0.55);
+    --aurora-3: rgba(186, 230, 215, 0.6);
+    --aurora-bg: linear-gradient(140deg, #f7fbff 0%, #ecf3ff 50%, #fef0f6 100%);
+
+    --header-h: 64px;
+    --aside-w: 232px;
+    --aside-w-compact: 72px;
+    --content-pad: clamp(12px, 2vw, 28px);
+
+    color-scheme: light;
+}
+
+html.dark {
+    --glass-bg: rgba(22, 28, 45, 0.55);
+    --glass-bg-strong: rgba(28, 34, 52, 0.75);
+    --glass-bg-weak: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-border-soft: rgba(255, 255, 255, 0.06);
+    --glass-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    --glass-shadow-strong: 0 22px 60px rgba(0, 0, 0, 0.55);
+
+    --aurora-1: rgba(72, 105, 220, 0.55);
+    --aurora-2: rgba(155, 71, 165, 0.45);
+    --aurora-3: rgba(45, 145, 165, 0.5);
+    --aurora-bg: linear-gradient(150deg, #0a0e1a 0%, #121833 55%, #1a0f24 100%);
+
+    color-scheme: dark;
+}
+
+/* --------- Background: aurora + blurred blobs ----------------------------- */
+
+body {
+    background: var(--aurora-bg) fixed;
+    color: var(--el-text-color-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    min-height: 100dvh;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(80px);
+    will-change: transform;
+}
+
+body::before {
+    width: 55vw;
+    height: 55vw;
+    top: -10vw;
+    left: -10vw;
+    background: radial-gradient(circle at 30% 30%, var(--aurora-1), transparent 60%);
+    animation: aurora-drift-a 22s ease-in-out infinite alternate;
+}
+
+body::after {
+    width: 60vw;
+    height: 60vw;
+    bottom: -15vw;
+    right: -15vw;
+    background: radial-gradient(circle at 70% 70%, var(--aurora-2), transparent 65%),
+        radial-gradient(circle at 30% 50%, var(--aurora-3), transparent 70%);
+    animation: aurora-drift-b 28s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift-a {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(8vw, 6vh, 0) scale(1.1); }
+}
+@keyframes aurora-drift-b {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(-6vw, -8vh, 0) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before, body::after { animation: none; }
+}
+
+/* Reusable glass class for ad-hoc surfaces. */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius);
+    box-shadow: var(--glass-shadow);
+}
+
+.glass-strong {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 4px)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius);
+    box-shadow: var(--glass-shadow-strong);
+}
+
+/* --------- App shell (used by App.vue) ----------------------------------- */
+
+.app-shell {
+    position: relative;
+    z-index: 1;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: var(--header-h) 1fr;
+    grid-template-columns: var(--aside-w) 1fr;
+    grid-template-areas:
+        "header header"
+        "aside  main";
+    gap: var(--content-pad);
+    padding: var(--content-pad);
+}
+
+.app-shell--no-aside {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "header"
+        "main";
+}
+
+.app-shell__header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    border-radius: var(--glass-radius);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 6px)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.app-shell__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.app-shell__brand-title {
+    font-size: clamp(15px, 1.4vw, 18px);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.app-shell__actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.app-shell__aside {
+    grid-area: aside;
+    border-radius: var(--glass-radius);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+}
+
+.app-shell__main {
+    grid-area: main;
+    border-radius: var(--glass-radius);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    overflow: auto;
+    padding: clamp(12px, 2vw, 24px);
+    min-width: 0;
+}
+
+@media (max-width: 1024px) {
+    :root {
+        --aside-w: 200px;
+    }
+}
+
+@media (max-width: 900px) {
+    .app-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "main";
+        gap: 10px;
+        padding: 10px;
+    }
+    .app-shell__aside { display: none; }
+}
+
+/* --------- Generic page wrapper used by every page ----------------------- */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 1.6vw, 20px);
+    min-width: 0;
+}
+
+.page__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.page__header h2 {
+    font-size: clamp(18px, 1.6vw, 22px);
+    font-weight: 600;
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.page__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.page__filters > .el-form-item,
+.page__filters > * {
+    margin-bottom: 0 !important;
+}
+
+.glass-card {
+    background: var(--glass-bg-weak);
+    border: 1px solid var(--glass-border-soft);
+    border-radius: var(--glass-radius-sm);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    padding: clamp(12px, 1.5vw, 20px);
+}
+
+/* --------- Element Plus overrides --------------------------------------- */
+
+/* Menu inside the aside becomes transparent over our glass card. */
+.el-menu,
+.app-shell__aside .el-menu,
+.el-drawer .el-menu {
+    background: transparent !important;
+    border-right: none !important;
+}
+
+.el-menu-item,
+.el-sub-menu__title {
+    border-radius: 12px;
+    margin: 2px 4px;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.el-menu-item:hover,
+.el-sub-menu__title:hover {
+    background: var(--glass-bg-weak) !important;
+    transform: translateX(2px);
+}
+
+.el-menu-item.is-active {
+    background: linear-gradient(
+        90deg,
+        rgba(64, 158, 255, 0.22),
+        rgba(64, 158, 255, 0.05)
+    ) !important;
+    color: var(--el-color-primary) !important;
+}
+
+html.dark .el-menu-item.is-active {
+    background: linear-gradient(
+        90deg,
+        rgba(120, 180, 255, 0.22),
+        rgba(120, 180, 255, 0.04)
+    ) !important;
+}
+
+/* Cards / panels */
+.el-card,
+.el-dialog,
+.el-drawer,
+.el-message-box,
+.el-popover.el-popper,
+.el-popper {
+    background: var(--glass-bg-strong) !important;
+    backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(calc(var(--glass-blur) + 2px)) saturate(var(--glass-saturate));
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--glass-radius) !important;
+    box-shadow: var(--glass-shadow) !important;
+}
+
+.el-card__header,
+.el-dialog__header,
+.el-drawer__header {
+    border-bottom: 1px solid var(--glass-border-soft) !important;
+}
+
+.el-tag {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 999px !important;
+}
+
+.el-button {
+    border-radius: 12px !important;
+    backdrop-filter: blur(6px) saturate(140%);
+    -webkit-backdrop-filter: blur(6px) saturate(140%);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.el-button:not(.is-text):not(.is-link):not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(.el-button--danger):not(.el-button--info) {
+    background: var(--glass-bg-strong) !important;
+    border: 1px solid var(--glass-border) !important;
+}
+
+.el-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(31, 38, 135, 0.18);
+}
+
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner,
+.el-input-number__decrease,
+.el-input-number__increase {
+    background: var(--glass-bg-weak) !important;
+    box-shadow: 0 0 0 1px var(--glass-border-soft) inset !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused {
+    box-shadow: 0 0 0 1px var(--el-color-primary) inset,
+        0 0 0 4px rgba(64, 158, 255, 0.18) !important;
+}
+
+/* Tables become glassy but still legible. */
+.el-table,
+.el-table tr,
+.el-table th.el-table__cell,
+.el-table tr.el-table__row td.el-table__cell,
+.el-table__inner-wrapper,
+.el-table__body-wrapper,
+.el-table__header-wrapper {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+    background-color: var(--glass-bg-weak) !important;
+}
+
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html.dark .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.el-table::before,
+.el-table--border::after,
+.el-table--border::before,
+.el-table__inner-wrapper::before {
+    background-color: var(--glass-border-soft) !important;
+}
+
+/* Drawer (mobile nav) */
+.el-drawer {
+    border-radius: 0 var(--glass-radius) var(--glass-radius) 0 !important;
+}
+
+.el-drawer.rtl,
+.el-drawer.ltr {
+    background: var(--glass-bg-strong) !important;
+}
+
+/* Pagination + segmented */
+.el-pagination .btn-prev,
+.el-pagination .btn-next,
+.el-pagination .el-pager li,
+.el-segmented {
+    background: var(--glass-bg-weak) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Loading mask should not block the aurora — keep it but lighter. */
+.el-loading-mask {
+    background-color: rgba(255, 255, 255, 0.55) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+html.dark .el-loading-mask {
+    background-color: rgba(10, 14, 26, 0.6) !important;
+}
+
+/* Scrollbar — slim and translucent. */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(120, 130, 160, 0.35);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 130, 160, 0.55);
+    background-clip: padding-box;
+}
+
+/* Small-screen Element Plus tweaks. */
+@media (max-width: 640px) {
+    .el-message-box,
+    .el-dialog {
+        width: calc(100vw - 24px) !important;
+        max-width: 480px;
+    }
+    .el-dialog {
+        margin: 12px auto !important;
+    }
+    .el-form-item__label {
+        text-align: left !important;
+    }
+    .el-form .el-form-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

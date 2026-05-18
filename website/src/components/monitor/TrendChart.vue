@@ -2,19 +2,19 @@
     <div class="trend-card">
         <div class="trend-header">
             <h3 class="trend-title">
-                历史趋势
+                {{ $t('monitor.trend.title') }}
                 <el-tooltip effect="dark" placement="top">
                     <template #content>
                         <div style="line-height: 1.8;">
-                            <div><b>数字单位说明：</b></div>
-                            <div>K = 千 (10³)</div>
-                            <div>M = 百万 (10⁶)</div>
-                            <div>G = 十亿 (10⁹)</div>
-                            <div>T = 万亿 (10¹²)</div>
-                            <div>P = 千万亿 (10¹⁵)</div>
-                            <div>E = 百京 (10¹⁸)</div>
-                            <div>Z = 十垓 (10²¹)</div>
-                            <div>Y = 千穰 (10²⁴)</div>
+                            <div><b>{{ $t('monitor.trend.units_heading') }}</b></div>
+                            <div>{{ $t('monitor.trend.unit_k') }}</div>
+                            <div>{{ $t('monitor.trend.unit_m') }}</div>
+                            <div>{{ $t('monitor.trend.unit_g') }}</div>
+                            <div>{{ $t('monitor.trend.unit_t') }}</div>
+                            <div>{{ $t('monitor.trend.unit_p') }}</div>
+                            <div>{{ $t('monitor.trend.unit_e') }}</div>
+                            <div>{{ $t('monitor.trend.unit_z') }}</div>
+                            <div>{{ $t('monitor.trend.unit_y') }}</div>
                         </div>
                     </template>
                     <el-icon style="margin-left: 6px; cursor: help;" :size="14">
@@ -24,44 +24,41 @@
             </h3>
             <div class="trend-controls">
                 <div class="control-item">
-                    <span class="control-label">时间范围</span>
+                    <span class="control-label">{{ $t('monitor.trend.time_range') }}</span>
                     <el-select v-model="timeRangeValue" size="small" @change="handleTimeRangeChange">
-                        <el-option label="近1小时" :value="1" />
-                        <el-option label="近4小时" :value="4" />
-                        <el-option label="近12小时" :value="12" />
-                        <el-option label="近1天" :value="24" />
-                        <el-option label="近3天" :value="72" />
-                        <el-option label="近7天" :value="168" />
-                        <el-option label="自定义" value="custom" />
+                        <el-option :label="$t('monitor.trend.range_1h')" :value="1" />
+                        <el-option :label="$t('monitor.trend.range_4h')" :value="4" />
+                        <el-option :label="$t('monitor.trend.range_12h')" :value="12" />
+                        <el-option :label="$t('monitor.trend.range_24h')" :value="24" />
+                        <el-option :label="$t('monitor.trend.range_72h')" :value="72" />
+                        <el-option :label="$t('monitor.trend.range_168h')" :value="168" />
+                        <el-option :label="$t('monitor.trend.range_custom')" value="custom" />
                     </el-select>
                 </div>
                 <div class="control-item" v-if="timeRangeValue === 'custom'">
                     <el-date-picker
                         v-model="customTimeRangeLocal"
                         type="datetimerange"
-                        range-separator="至"
-                        start-placeholder="开始时间"
-                        end-placeholder="结束时间"
+                        :range-separator="$t('monitor.trend.date_range_to')"
+                        :start-placeholder="$t('monitor.trend.start_time')"
+                        :end-placeholder="$t('monitor.trend.end_time')"
                         size="small"
-                        :shortcuts="dateShortcuts"
+                        :shortcuts="trendDateShortcuts"
                         @change="handleCustomTimeChange"
                     />
                 </div>
                 <div class="control-item">
-                    <span class="control-label">时间粒度</span>
+                    <span class="control-label">{{ $t('monitor.trend.granularity') }}</span>
                     <el-select v-model="granularityValue" size="small" @change="handleGranularityChange">
-                        <el-option label="无" value="none" />
-                        <el-option label="1小时平均" value="1h" />
+                        <el-option :label="$t('monitor.trend.granularity_none')" value="none" />
+                        <el-option :label="$t('monitor.trend.granularity_1h')" value="1h" />
                     </el-select>
                 </div>
             </div>
         </div>
 
-        <!-- 图表容器 -->
         <div class="chart-container" v-loading="loading">
-            <!-- 空状态 -->
-            <el-empty v-if="!loading && isEmpty" description="暂无数据" />
-            <!-- 图表 -->
+            <el-empty v-if="!loading && isEmpty" :description="$t('monitor.trend.empty')" />
             <template v-else>
                 <div ref="euStoredChart" class="chart"></div>
                 <div ref="wirelessEUChart" class="chart"></div>
@@ -120,32 +117,6 @@ export default {
                 wirelessEU: { max: null, min: null, avg: null },
             },
             customTimeRangeLocal: [threeDaysAgo, now],
-            dateShortcuts: [
-                {
-                    text: '最近1天',
-                    value: () => {
-                        const end = new Date();
-                        const start = new Date(end.getTime() - 24 * 3600 * 1000);
-                        return [start, end];
-                    },
-                },
-                {
-                    text: '最近3天',
-                    value: () => {
-                        const end = new Date();
-                        const start = new Date(end.getTime() - 3 * 24 * 3600 * 1000);
-                        return [start, end];
-                    },
-                },
-                {
-                    text: '最近7天',
-                    value: () => {
-                        const end = new Date();
-                        const start = new Date(end.getTime() - 7 * 24 * 3600 * 1000);
-                        return [start, end];
-                    },
-                },
-            ],
         };
     },
     computed: {
@@ -168,6 +139,34 @@ export default {
         isEmpty() {
             return !this.historyData || this.historyData.length === 0;
         },
+        trendDateShortcuts() {
+            return [
+                {
+                    text: this.$t('monitor.trend.shortcut_last_1d'),
+                    value: () => {
+                        const end = new Date();
+                        const start = new Date(end.getTime() - 24 * 3600 * 1000);
+                        return [start, end];
+                    },
+                },
+                {
+                    text: this.$t('monitor.trend.shortcut_last_3d'),
+                    value: () => {
+                        const end = new Date();
+                        const start = new Date(end.getTime() - 3 * 24 * 3600 * 1000);
+                        return [start, end];
+                    },
+                },
+                {
+                    text: this.$t('monitor.trend.shortcut_last_7d'),
+                    value: () => {
+                        const end = new Date();
+                        const start = new Date(end.getTime() - 7 * 24 * 3600 * 1000);
+                        return [start, end];
+                    },
+                },
+            ];
+        },
     },
     setup() {
         const isDark = useDark();
@@ -183,7 +182,6 @@ export default {
             deep: true,
         },
         isDark() {
-            // 暗色模式切换时更新图表颜色
             if (this.historyData && this.historyData.length > 0) {
                 this.processChartData(this.historyData);
             }
@@ -191,13 +189,11 @@ export default {
     },
     methods: {
         handleTimeRangeChange(val) {
-            // 当切换到自定义时，自动应用默认的自定义时间范围
             if (val === 'custom') {
                 this.handleCustomTimeChange(this.customTimeRangeLocal);
             }
         },
         handleGranularityChange() {
-            // 父组件会响应 v-model 更新并重新获取数据
         },
         handleCustomTimeChange(val) {
             if (val && val.length === 2) {
@@ -210,13 +206,11 @@ export default {
         initCharts() {
             const textColor = this.isDark ? '#E5EAF3' : '#1a1a1a';
 
-            // EU存储电量图表
             this.chartInstances.euStored = echarts.init(this.$refs.euStoredChart);
-            this.chartInstances.euStored.setOption(this.getChartOption('兰波顿存储电量', textColor));
+            this.chartInstances.euStored.setOption(this.getChartOption(this.$t('monitor.eu_stored'), textColor));
 
-            // 无线电网电量图表
             this.chartInstances.wirelessEU = echarts.init(this.$refs.wirelessEUChart);
-            this.chartInstances.wirelessEU.setOption(this.getChartOption('无线电网电量', textColor));
+            this.chartInstances.wirelessEU.setOption(this.getChartOption(this.$t('monitor.wireless_eu'), textColor));
         },
         getChartOption(title, textColor) {
             return {
@@ -299,12 +293,10 @@ export default {
         processChartData(history) {
             let processedData = history;
 
-            // 如果选择了时间粒度，进行聚合
             if (this.granularity === '1h') {
                 processedData = this.aggregateByHour(history);
             }
 
-            // 计算统计信息
             const euStoredValues = processedData.map(item => item.results.eu_stored);
             const wirelessEUValues = processedData.map(item => item.results.total_wireless_eu);
 
@@ -320,7 +312,6 @@ export default {
                 avg: wirelessEUValues.reduce((a, b) => a + b, 0) / wirelessEUValues.length,
             };
 
-            // 更新图表
             this.updateCharts(processedData);
         },
         aggregateByHour(history) {
@@ -362,23 +353,38 @@ export default {
             const wirelessEUData = data.map(item => item.results.total_wireless_eu);
 
             const textColor = this.isDark ? '#E5EAF3' : '#1a1a1a';
+            const euTitle = this.$t('monitor.eu_stored');
+            const wirelessTitle = this.$t('monitor.wireless_eu');
+            const statsEu = this.$t('monitor.trend.stats_line', {
+                max: this.formatLargeNumber(this.chartStats.euStored.max),
+                min: this.formatLargeNumber(this.chartStats.euStored.min),
+                avg: this.formatLargeNumber(this.chartStats.euStored.avg),
+            });
+            const statsW = this.$t('monitor.trend.stats_line', {
+                max: this.formatLargeNumber(this.chartStats.wirelessEU.max),
+                min: this.formatLargeNumber(this.chartStats.wirelessEU.min),
+                avg: this.formatLargeNumber(this.chartStats.wirelessEU.avg),
+            });
+            const nmMax = this.$t('monitor.trend.stats_max');
+            const nmMin = this.$t('monitor.trend.stats_min');
+            const nmAvg = this.$t('monitor.trend.stats_avg');
 
-            // 更新EU存储电量图表
             this.chartInstances.euStored.setOption({
                 xAxis: { data: times, axisLabel: { color: textColor } },
                 yAxis: { axisLabel: { color: textColor } },
-                title: { textStyle: { color: textColor } },
+                title: { text: euTitle, textStyle: { color: textColor } },
                 graphic: [{
                     type: 'text',
                     left: 60,
                     top: 30,
                     style: {
-                        text: `最大: ${this.formatLargeNumber(this.chartStats.euStored.max)}  最小: ${this.formatLargeNumber(this.chartStats.euStored.min)}  平均: ${this.formatLargeNumber(this.chartStats.euStored.avg)}`,
+                        text: statsEu,
                         fill: textColor,
                         fontSize: 12,
                     },
                 }],
                 series: [{
+                    name: euTitle,
                     data: euStoredData,
                     markLine: {
                         silent: true,
@@ -387,30 +393,30 @@ export default {
                             formatter: (params) => `${params.name}: ${this.formatLargeNumber(params.value)}`,
                         },
                         data: [
-                            { type: 'max', name: '最大' },
-                            { type: 'min', name: '最小' },
-                            { type: 'average', name: '平均' },
+                            { type: 'max', name: nmMax },
+                            { type: 'min', name: nmMin },
+                            { type: 'average', name: nmAvg },
                         ],
                     },
                 }],
             });
 
-            // 更新无线电网电量图表
             this.chartInstances.wirelessEU.setOption({
                 xAxis: { data: times, axisLabel: { color: textColor } },
                 yAxis: { axisLabel: { color: textColor } },
-                title: { textStyle: { color: textColor } },
+                title: { text: wirelessTitle, textStyle: { color: textColor } },
                 graphic: [{
                     type: 'text',
                     left: 60,
                     top: 30,
                     style: {
-                        text: `最大: ${this.formatLargeNumber(this.chartStats.wirelessEU.max)}  最小: ${this.formatLargeNumber(this.chartStats.wirelessEU.min)}  平均: ${this.formatLargeNumber(this.chartStats.wirelessEU.avg)}`,
+                        text: statsW,
                         fill: textColor,
                         fontSize: 12,
                     },
                 }],
                 series: [{
+                    name: wirelessTitle,
                     data: wirelessEUData,
                     markLine: {
                         silent: true,
@@ -419,9 +425,9 @@ export default {
                             formatter: (params) => `${params.name}: ${this.formatLargeNumber(params.value)}`,
                         },
                         data: [
-                            { type: 'max', name: '最大' },
-                            { type: 'min', name: '最小' },
-                            { type: 'average', name: '平均' },
+                            { type: 'max', name: nmMax },
+                            { type: 'min', name: nmMin },
+                            { type: 'average', name: nmAvg },
                         ],
                     },
                 }],

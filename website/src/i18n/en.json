@@ -1,0 +1,709 @@
+{
+  "app": {
+    "title": "GTNH Cyber",
+    "loading": "Loading..."
+  },
+  "home": {
+    "subtitle": "OpenComputers-powered remote control suite for GT New Horizons AE2",
+    "repo": "Repository",
+    "author": "Author",
+    "mobile_hint": "The full feature set is best used on a desktop screen."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "refresh": "Refresh",
+    "search": "Search",
+    "yes": "Yes",
+    "no": "No",
+    "error": "Error",
+    "success": "Done",
+    "empty": "No data",
+    "add": "Add",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "actions": "Actions",
+    "submit": "Submit",
+    "details": "Details",
+    "remove": "Remove",
+    "index": "#",
+    "unknown": "Unknown",
+    "empty_response": "Empty response from server",
+    "unknown_error": "Unknown error"
+  },
+  "error_display": {
+    "title": "Failed to load data",
+    "unknown": "Unknown error",
+    "hint": "Check that the backend URL and token are set correctly in Settings.",
+    "refresh": "Reload page"
+  },
+  "errors": {
+    "tasks": {
+      "set_backend": "Set backend URL in Settings first.",
+      "bad_response": "Invalid server response (check backend URL in Settings).",
+      "missing_token": "Set Server Token in Settings (X-Server-Token header).",
+      "status_fail": "Task status failed ({code}): {detail}",
+      "status_catch": "Task status request failed: {detail}",
+      "submit_fail": "Submit task failed ({code}): {detail}",
+      "submit_catch": "Submit task failed: {detail}",
+      "submit_no_id": "Submit task failed: missing task id.",
+      "refresh_cpu": "Refresh CPUs failed: {detail}"
+    },
+    "history": {
+      "empty": "No history for this task yet.",
+      "fail": "Load history failed: {detail}",
+      "catch": "History request failed: {detail}"
+    },
+    "craft": {
+      "title": "Craft order",
+      "submitted": "Order submitted. See Tasks. Task id: {taskId}",
+      "success": "Order succeeded. See Tasks. Task id: {taskId}",
+      "failed": "Order failed{reason}. See Tasks. Task id: {taskId}",
+      "reason_missing": ": missing materials or no free CPU",
+      "reason_unknown": ": unknown error"
+    },
+    "automate": {
+      "http_error": "{action}: server returned {code}. {detail}",
+      "http_throw": "{action}: {detail}",
+      "actions": {
+        "trigger_config": "Trigger configuration",
+        "trigger_add": "Add trigger",
+        "trigger_remove": "Remove trigger",
+        "trigger_list": "Trigger list",
+        "trigger_start": "Start trigger",
+        "trigger_stop": "Stop trigger",
+        "timer_config": "Timer configuration",
+        "timer_add": "Add timer",
+        "timer_remove": "Remove timer",
+        "timer_list": "Timer list",
+        "timer_start": "Start timer",
+        "timer_stop": "Stop timer",
+        "action_template": "Action templates"
+      }
+    }
+  },
+  "cpu": {
+    "busy": "Busy",
+    "idle": "Idle",
+    "last_update": "Last update",
+    "select": "Select CPU",
+    "auto_alloc": "Auto-assign",
+    "get_info": "Refresh CPUs",
+    "status": "Status",
+    "storage": "Storage",
+    "coprocessors": "Co-processors",
+    "crafting": "Crafting",
+    "planned": "Planned",
+    "stored": "Stored",
+    "no_items": "No items",
+    "request_sent": "Request sent, waiting for OC… ({task})",
+    "refresh_success": "CPU list refreshed",
+    "refresh_failed": "Failed to refresh CPUs ({msg})"
+  },
+  "automateUi": {
+    "load_tasks_failed": "Failed to load tasks: {detail}",
+    "load_config_failed": "Failed to load task config: {detail}",
+    "fill_condition_action": "Fill trigger condition and action completely.",
+    "pick_cpu": "Select a CPU to watch.",
+    "interval_seconds": "Set a valid poll interval (at least 1 second).",
+    "delay_min_60": "Delay must be at least 60 seconds.",
+    "pick_schedule_time": "Pick a schedule time.",
+    "schedule_future": "Schedule time should be in the future.",
+    "pick_craft_item": "Select an item to craft.",
+    "craft_amount_min": "Enter a valid craft amount (at least 1).",
+    "json_body_invalid": "Request body must be valid JSON.",
+    "invalid_headers": "{n} invalid header(s) (empty key or value).",
+    "invalid_params": "{n} invalid URL parameter(s) (empty key or value).",
+    "url_required": "Request URL cannot be empty.",
+    "method_required": "HTTP method cannot be empty.",
+    "url_suspicious": "URL format looks unusual — please verify.",
+    "invalid_trigger": "Invalid trigger condition.",
+    "adding_wait": "Adding task, please wait…",
+    "task_added": "Task added.",
+    "template_fetch_warn": "Could not load template data.",
+    "task_invalid": "Task data is invalid.",
+    "task_started": "Task started.",
+    "task_stopped": "Task stopped.",
+    "task_detail_unavailable": "Cannot show task details.",
+    "task_removed": "Task removed.",
+    "template_invalid": "Invalid template.",
+    "template_applied": "Template applied.",
+    "template_apply_failed": "Failed to apply template."
+  },
+  "tasks": {
+    "last_update": "Last update",
+    "add_monitor": "Add task watch",
+    "refresh_list": "Refresh list",
+    "task_id": "Task ID",
+    "type": "Type",
+    "created_time": "Created",
+    "executed_time": "Started",
+    "completed_time": "Completed",
+    "status_col": "Status",
+    "details": "Task details",
+    "click_for_details": "Click for details",
+    "load_failed": "Failed to load tasks",
+    "fetch_status_failed": "Failed to fetch status for task {id}",
+    "prompt_id": "Enter task ID",
+    "submit_task": "Add task",
+    "bad_id": "Invalid task ID",
+    "empty_id": "Task ID is empty",
+    "custom_kind": "Custom",
+    "added_success": "Task added to the list",
+    "status": {
+      "ready": "Waiting for request",
+      "pending": "Waiting for response",
+      "completed": "Completed",
+      "unknown": "Unknown"
+    }
+  },
+  "info": {
+    "gtnh_version": "GTNH version",
+    "web_version": "Web version",
+    "backend_version": "Backend version",
+    "oc_clients": "OC clients",
+    "clients_count": "{n} client(s) — click for details",
+    "source_code": "Source code",
+    "issues": "Issues",
+    "api_docs": "API docs",
+    "license": "License",
+    "client_dialog_title": "Clients",
+    "client_id": "Client ID",
+    "last_active": "Last active",
+    "backend_not_configured": "Backend URL is not configured",
+    "fetch_meta_failed": "Failed to load backend info ({code}): {msg}",
+    "fetch_clients_failed": "Failed to load clients ({code}): {msg}"
+  },
+  "items": {
+    "search_placeholder": "Search…",
+    "search_type": "Field",
+    "title_field": "Display name",
+    "label_field": "Label",
+    "get": "Refresh items",
+    "amount": "Amount",
+    "craftable_tag": "Craftable",
+    "stored": "Stored",
+    "other_props": "Other fields",
+    "click_copy": "Click a row to copy",
+    "craft_action": "Order craft",
+    "last_update": "Last update",
+    "total_count": "Total: {n}",
+    "craft_amount": "Amount",
+    "amount_placeholder": "Order quantity",
+    "select_cpu": "CPU",
+    "fetch_cpus_first": "Load CPU list first",
+    "cpu_only_named_idle": "Only named, idle CPUs",
+    "get_cpu": "Load CPUs",
+    "craft_dialog_title": "Craft order",
+    "craft_dialog_with_name": "Craft — {name}",
+    "uploading": "Client is uploading data… ({task})",
+    "request_sent": "Request sent, waiting for OC… ({task})",
+    "copy_success": "Copied",
+    "copy_failed": "Copy failed",
+    "refresh_success": "Item list refreshed",
+    "filter": {
+      "all": "All",
+      "craftable": "Craftable only",
+      "items": "Items",
+      "fluids": "Fluids"
+    }
+  },
+  "monitor": {
+    "eu_stored": "Lapotron storage (EU)",
+    "wireless_eu": "Wireless network (EU)",
+    "wireless_eu_tooltip": "From Lapotron capacitor telemetry",
+    "no_history": "No history yet",
+    "parse_failed": "Failed to parse history",
+    "vs_previous": "vs previous sample",
+    "trend": {
+      "title": "History trend",
+      "units_heading": "Number suffixes:",
+      "unit_k": "K = thousand (10³)",
+      "unit_m": "M = million (10⁶)",
+      "unit_g": "G = billion (10⁹)",
+      "unit_t": "T = trillion (10¹²)",
+      "unit_p": "P = quadrillion (10¹⁵)",
+      "unit_e": "E = quintillion (10¹⁸)",
+      "unit_z": "Z = sextillion (10²¹)",
+      "unit_y": "Y = septillion (10²⁴)",
+      "time_range": "Time range",
+      "granularity": "Granularity",
+      "range_1h": "Last 1 hour",
+      "range_4h": "Last 4 hours",
+      "range_12h": "Last 12 hours",
+      "range_24h": "Last 1 day",
+      "range_72h": "Last 3 days",
+      "range_168h": "Last 7 days",
+      "range_custom": "Custom",
+      "granularity_none": "None",
+      "granularity_1h": "1-hour average",
+      "date_range_to": "to",
+      "start_time": "Start",
+      "end_time": "End",
+      "empty": "No data",
+      "shortcut_last_1d": "Last day",
+      "shortcut_last_3d": "Last 3 days",
+      "shortcut_last_7d": "Last 7 days",
+      "stats_max": "Max",
+      "stats_min": "Min",
+      "stats_avg": "Avg",
+      "stats_line": "Max: {max}  Min: {min}  Avg: {avg}"
+    }
+  },
+  "automate_page": {
+    "last_update": "Last update",
+    "add_task": "Add automation",
+    "refresh": "Refresh list",
+    "col_index": "#",
+    "col_id": "ID",
+    "col_type": "Type",
+    "col_trigger": "Trigger",
+    "col_action": "Action",
+    "col_status": "Status",
+    "col_ops": "Actions",
+    "detail_btn": "Details",
+    "remove_btn": "Remove",
+    "start": "Start",
+    "stop": "Stop",
+    "types": {
+      "trigger": "Trigger",
+      "timer": "Timer"
+    },
+    "group": {
+      "trigger": "Triggers",
+      "timer": "Timers"
+    },
+    "names": {
+      "cpu_idle": "When CPU becomes idle",
+      "delay_timer": "Delayed run",
+      "scheduled_timer": "Scheduled run"
+    },
+    "trigger_desc": {
+      "cpu_idle": "When the selected crafting CPU becomes idle."
+    },
+    "timer_desc": {
+      "delay_timer": "One-shot run after N seconds.",
+      "scheduled_timer": "One-shot run at the given date and time."
+    },
+    "action_kind": {
+      "craft": "Craft item",
+      "http_request": "HTTP request"
+    },
+    "loading": "Loading…",
+    "detail_title": "Automation details",
+    "add_title": "Add automation",
+    "basic_info": "Summary",
+    "lifecycle": "Lifecycle",
+    "interval_sec": "Poll interval",
+    "sec": "s",
+    "timeline_created": "Created",
+    "timeline_start": "Last start",
+    "timeline_monitor": "Last poll",
+    "timeline_execute": "Action run",
+    "timeline_execute_est": "(expected)",
+    "timeline_done": "Finished",
+    "trigger_section": "Trigger",
+    "action_section": "Action",
+    "craft_target": "Craft target",
+    "result": "Result",
+    "none": "None",
+    "form_trigger": "Trigger",
+    "form_trigger_ph": "Choose trigger",
+    "watch_cpu": "Watch CPU",
+    "cpu_busy_footer": "Named busy CPUs only",
+    "client_id": "Client ID",
+    "client_id_tip": "Leave empty for default",
+    "client_id_ph": "Client ID",
+    "poll_interval": "Poll interval",
+    "delay_label": "Delay",
+    "delay_ph": "Seconds",
+    "schedule_label": "Run at",
+    "schedule_ph": "Pick date & time",
+    "form_action": "Action",
+    "form_action_ph": "Choose action",
+    "target_item": "Target item",
+    "fluid_search_footer": "Fluids: search by English/internal name",
+    "craft_qty": "Quantity",
+    "craft_qty_ph": "Amount",
+    "unit_count": "pcs",
+    "cpu_optional": "CPU (optional)",
+    "cpu_busy_tip": "If the CPU is busy when the craft runs, the order may fail",
+    "http_method": "HTTP method",
+    "http_method_ph": "Method",
+    "http_url": "URL",
+    "http_url_ph": "https://…",
+    "http_headers": "Headers",
+    "http_params": "Query params",
+    "http_body": "Body (JSON)",
+    "key_ph": "Key",
+    "value_ph": "Value",
+    "remove_row": "Remove",
+    "add_row": "Add",
+    "use_template": "Use template",
+    "add_btn": "Add",
+    "template_title": "Templates",
+    "template_col_name": "Name",
+    "template_col_desc": "Description",
+    "template_use": "Apply",
+    "status": {
+      "ready": "Ready",
+      "pending": "Running",
+      "completed": "Done"
+    },
+    "errors": {
+      "backend_url": "Configure backend URL in Settings",
+      "trigger_list": "Failed to load triggers",
+      "timer_list": "Failed to load timers",
+      "load_tasks": "Failed to load tasks",
+      "incomplete_form": "Select trigger and action",
+      "pick_cpu": "Select a CPU to watch",
+      "interval_min": "Poll interval must be at least 1 second",
+      "delay_min": "Delay must be at least 60 seconds",
+      "pick_time": "Pick a schedule time",
+      "future_time": "Schedule must be in the future",
+      "pick_item": "Select an item to craft",
+      "qty_min": "Amount must be at least 1",
+      "invalid_json": "Body must be valid JSON",
+      "invalid_headers": "{n} invalid header row(s)",
+      "invalid_params": "{n} invalid param row(s)",
+      "url_required": "URL is required",
+      "method_required": "HTTP method is required",
+      "url_warn": "URL format looks unusual — please verify",
+      "invalid_trigger": "Invalid trigger",
+      "adding": "Submitting…",
+      "trigger_cfg": "Failed to load trigger config",
+      "timer_cfg": "Failed to load timer config",
+      "load_cfg": "Failed to load automation config",
+      "templates_fail": "Failed to load templates",
+      "invalid_task": "Invalid task",
+      "invalid_template": "Invalid template",
+      "detail_fail": "Could not open details"
+    },
+    "success": {
+      "added": "Task created",
+      "started": "Started",
+      "stopped": "Stopped",
+      "removed": "Removed"
+    }
+  },
+  "menu": {
+    "home": "Home",
+    "monitor": "Monitor",
+    "items": "Terminal",
+    "cpus": "CPUs",
+    "tasks": "Tasks",
+    "automate": "Automate",
+    "robots": "Robots",
+    "autocraft": "Autocraft",
+    "map": "Map",
+    "quests": "Quests",
+    "wiki": "Wiki",
+    "settings": "Settings",
+    "info": "Info"
+  },
+  "lang": {
+    "switch": "Language",
+    "ru": "Русский",
+    "en": "English",
+    "zh": "中文"
+  },
+  "robots": {
+    "tabs": {
+      "registry": "Fleet",
+      "mining": "Mining jobs",
+      "power": "Generators / turbines"
+    },
+    "hint": "OC plugins: robot_crop, robot_miner, robot_power (generator + fuel capsules). Queue via /api/task/add. See kb/02-opencomputers/robots-setup.ru.md and kb/03-gtnh/gt-power-deploy.md.",
+    "register": {
+      "client_id": "Client ID",
+      "client_ph": "e.g. robot_crop_01",
+      "kind": "Role",
+      "label": "Label",
+      "label_ph": "Optional",
+      "submit": "Register / update",
+      "need_id": "Enter client ID",
+      "presets": "Quick add",
+      "preset_ae": "Example: client_01 (AE)",
+      "preset_miner": "Example: robot_miner_01"
+    },
+    "actions": {
+      "harvest": "Queue harvestBelow",
+      "ping": "Queue miner ping",
+      "power_ping": "Queue power ping",
+      "task_queued": "Task queued — check Tasks page"
+    },
+    "power": {
+      "robot_client": "Robot client ID",
+      "robot_ph": "robot_miner_01",
+      "generator_kind": "Generator kind",
+      "fuel_kind": "Fuel",
+      "capsule_count": "Capsule attempts",
+      "create": "Create job",
+      "queue_deploy": "Queue deploy",
+      "need_robot": "Assign a robot client ID"
+    },
+    "mining": {
+      "robot_client": "Robot client ID",
+      "robot_ph": "robot_miner_01",
+      "miner_kind": "Miner kind",
+      "dimension": "Dimension",
+      "note": "Note",
+      "create": "Create job",
+      "coords": "XYZ",
+      "state": "Job state",
+      "mark_running": "Running",
+      "mark_done": "Done",
+      "queue_accept": "Queue accept",
+      "queue_deploy": "Queue deploy",
+      "queued_on_create": "Job created and queued for the robot (running)",
+      "need_robot": "Assign a robot client ID for this job"
+    },
+    "list": {
+      "title": "Robots",
+      "empty": "No robots registered",
+      "columns": {
+        "client_id": "Client ID",
+        "kind": "Kind",
+        "state": "State",
+        "last_message": "Message"
+      }
+    },
+    "kind": {
+      "ae": "ME / AE2 (client_01)",
+      "crop": "Crop farmer",
+      "miner": "Miner",
+      "power": "Power (generator)",
+      "scanner": "Scanner",
+      "generic": "Generic"
+    },
+    "state": {
+      "idle": "Idle",
+      "moving": "Moving",
+      "working": "Working",
+      "unloading": "Unloading",
+      "returning": "Returning",
+      "error": "Error"
+    }
+  },
+  "autocraft": {
+    "title": "Autocraft",
+    "patterns": {
+      "title": "AE2 Patterns",
+      "empty": "No patterns programmed yet",
+      "add": "Add pattern",
+      "edit": "Edit pattern",
+      "program": "Program",
+      "program_prompt": "Client ID of the OC computer that should program this pattern:",
+      "confirm_delete": "Delete pattern #{id}?",
+      "col_label": "Label",
+      "col_iface": "ME Interface",
+      "col_kind": "Kind",
+      "col_id": "ID",
+      "col_slot": "Slot",
+      "kind_processing": "Processing",
+      "kind_crafting": "Crafting",
+      "field": {
+        "label": "Label",
+        "iface": "ME Interface address",
+        "slot": "Slot",
+        "kind": "Pattern kind",
+        "inputs": "Inputs",
+        "outputs": "Outputs"
+      }
+    },
+    "requests": {
+      "title": "Craft queue",
+      "empty": "No craft requests yet",
+      "request_item": "Request item",
+      "submit": "Submit",
+      "col_item": "Item",
+      "col_amount": "Amount",
+      "col_cpu": "CPU",
+      "col_state": "State",
+      "col_id": "ID",
+      "col_client": "Client",
+      "state": {
+        "queued": "Queued",
+        "cancelling": "Cancelling",
+        "done": "Done",
+        "failed": "Failed"
+      },
+      "field": {
+        "client": "Client ID",
+        "item": "Item internal name",
+        "damage": "Damage",
+        "amount": "Amount",
+        "cpu": "CPU name (optional)"
+      }
+    },
+    "cpus": {
+      "scan": "Scan CPUs",
+      "detail": "Include detailed CPU activity"
+    },
+    "item": {
+      "name": "name",
+      "damage": "dmg",
+      "amount": "qty"
+    },
+    "wiki": {
+      "fill_from": "Fill from wiki (NESQL)",
+      "dialog_title": "Recipe from NESQL",
+      "search_ph": "Search item name…",
+      "search_btn": "Search",
+      "recipes_for": "Recipes producing this item",
+      "apply": "Apply inputs/outputs",
+      "hint": "Uses imported NESQL DB; ME must have machines for this recipe type.",
+      "no_items": "No items found",
+      "no_recipes": "No recipes",
+      "skipped_fluids": "Fluid slots were skipped (set manually if needed)",
+      "back": "Back to items",
+      "recipe_line": "{type} · {eu} EU/t · {ticks} ticks"
+    }
+  },
+  "map": {
+    "title": "World map",
+    "empty": "No scan yet",
+    "dimension": "Dimension",
+    "refresh": "Refresh",
+    "filters": {
+      "ore": "Ores",
+      "fluid": "Fluids",
+      "all": "All"
+    },
+    "settings_hint": "Map origin (center) is configured under Settings."
+  },
+  "quests": {
+    "title": "GTNH quests",
+    "empty": "NESQL has not been imported yet",
+    "refresh": "Refresh",
+    "search_ph": "Search quests (min 2 characters)…",
+    "search_btn": "Search",
+    "search_hint": "Uses /api/quests/search over imported NESQL data.",
+    "col_line": "Line",
+    "back_tree": "Full tree",
+    "detail_title": "Quest",
+    "tasks": "Tasks",
+    "rewards": "Rewards",
+    "view_board": "Quest book",
+    "view_tree": "Tree",
+    "select_line": "Quest chapter",
+    "board": {
+      "completion": "Completion: {done}/{total}",
+      "empty_line": "No quests in this chapter (check NESQL import).",
+      "auto_layout": "Layout is auto-generated from prerequisites (BQ canvas coords in NESQL are optional)."
+    }
+  },
+  "wiki": {
+    "title": "Wiki (NESQL)",
+    "search_placeholder": "Search items...",
+    "meta": {
+      "unavailable": "NESQL has not been imported yet. See tools/nesql-import/.",
+      "imported": "{count} items, DB {size}"
+    },
+    "filter": {
+      "mod_all": "All mods"
+    },
+    "col": {
+      "name": "Name",
+      "internal": "Internal",
+      "mod": "Mod",
+      "damage": "Damage",
+      "stack": "Stack"
+    },
+    "detail": {
+      "title": "Item",
+      "oredict": "OreDict",
+      "aspects": "Thaumcraft aspects",
+      "recipes_out": "Recipes producing this item",
+      "recipe_type": "Type",
+      "duration": "Ticks",
+      "empty": "Empty",
+      "recipe_click": "Click a row to open the recipe layout."
+    },
+    "recipe": {
+      "machine": "Machine",
+      "inputs": "Inputs",
+      "outputs": "Outputs",
+      "fluid": "Fluid",
+      "ticks": "{n} ticks",
+      "eu": "{n} EU/t"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "alert": "Do not share this page with anyone. All values are stored locally (localStorage).",
+    "confirm_reload": "Reload the page to apply the changes?",
+    "dark_mode": "Dark mode",
+    "language": "UI language",
+    "section": {
+      "backend": "Backend",
+      "basic": "General",
+      "map": "World map",
+      "other": "Other"
+    },
+    "fields": {
+      "backendUrl": {
+        "label": "Backend URL",
+        "placeholder": "empty = same host (/api proxy)",
+        "tooltip": "Leave empty when the UI proxies /api to the backend. Otherwise set the backend URL, e.g. http://host:18856"
+      },
+      "token": {
+        "label": "Server token",
+        "placeholder": "X-Server-Token"
+      },
+      "pageTitle": {
+        "label": "Page title",
+        "placeholder": "GTNH Cyber"
+      },
+      "numberFormatting": {
+        "label": "Number formatting"
+      },
+      "showMoniter": {
+        "label": "Show Monitor tab",
+        "tooltip": "Enables the monitoring page.<br/>Requires the `moniter` plugin enabled in your OC client."
+      },
+      "showFluid": {
+        "label": "Show fluid icons for droplets"
+      },
+      "refreshCPU": {
+        "label": "Refresh CPUs after ordering",
+        "tooltip": "After a craft order returns the CPU list (in-memory, cleared on reload).<br/>Avoid this for high-volume ordering or large CPU networks."
+      },
+      "useTaskGzip": {
+        "label": "Compress task results",
+        "tooltip": "Sends task results compressed.<br/>Increases CPU load — useful when payloads are big."
+      },
+      "useGzip": {
+        "label": "Compress item dataset",
+        "tooltip": "Requests the static item dataset (`items_GTNH*.json`) in gzip form.<br/>Disable if your reverse proxy already serves gzip."
+      },
+      "resourceUrl": {
+        "label": "Custom asset URL",
+        "placeholder": "Directory that hosts the item JSON files"
+      },
+      "mapOriginX": {
+        "label": "Map: origin X (F3)",
+        "placeholder": "3220",
+        "tooltip": "World X of your map center. Markers are offset from this value."
+      },
+      "mapOriginZ": {
+        "label": "Map: origin Z (F3)",
+        "placeholder": "-4900",
+        "tooltip": "World Z of your map center."
+      },
+      "mapDefaultDimension": {
+        "label": "Map: default dimension",
+        "placeholder": "0",
+        "tooltip": "0 = overworld, -1 = Nether, etc."
+      }
+    },
+    "segments": {
+      "numberFormatting": {
+        "original": "Raw",
+        "thousand": "1,000",
+        "short": "Short"
+      }
+    }
+  }
+}

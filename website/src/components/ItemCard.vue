@@ -43,11 +43,11 @@ export default {
         updateItem(item) {
             const updatedItem = itemUtil.getItem(item);
             if (item.name === "ae2fc:fluid_drop") {
-                item.image = itemUtil.getFluidIcon(data);
+                item.image = itemUtil.getFluidIcon(item);
             } else {
                 item.image = itemUtil.getItemIcon(updatedItem);
             }
-            item.title = itemUtil.getName(updatedItem, item, {}) || item.label;
+            item.title = itemUtil.getName(updatedItem, item, item) || item.label;
         }
     },
     created() {
@@ -86,7 +86,7 @@ export default {
 }
 
 .unknow-icon {
-    /* 居中 */
+    /* Center */
     position: absolute;
     top: 50%;
     left: 50%;
