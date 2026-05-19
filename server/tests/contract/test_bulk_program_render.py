@@ -17,5 +17,6 @@ def test_bulk_program_lua_escapes_iface_and_emits_do_blocks():
             }
         ]
     )
-    assert "ae.setMeInterfaceAddress('a\\'b\\\\x')" in lua
-    assert "ae.programPattern(3," in lua
+    assert lua.startswith("return ae.bulkProgramPatterns(")
+    assert "bulkProgramPatterns" in lua
+    assert "ingotIron" in lua

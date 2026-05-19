@@ -10,6 +10,7 @@ Uses ``SYNC_DATABASE_URL`` for the main database.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import hashlib
 import json
 import os
@@ -19,7 +20,14 @@ import sys
 from sqlalchemy import create_engine, delete, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.db.models import CraftAlias, CraftAliasMember, CraftRecipeInput, CraftRecipeOutput, CraftRecipeResolved
+from app.db.models import (
+    CraftAlias,
+    CraftAliasMember,
+    CraftRecipeInput,
+    CraftRecipeOutput,
+    CraftRecipeResolved,
+    CraftResolvedSnapshot,
+)
 
 
 def _alias_for_nesql_item(
@@ -82,6 +90,19 @@ def _trunc_craft_recipes(session: Session) -> None:
     session.execute(delete(CraftRecipeInput))
     session.execute(delete(CraftRecipeResolved))
     session.flush()
+
+
+def _touch_snapshot(session: Session, recipes_n: int, edges_n: int) -> None:
+    snap = session.get(CraftResolvedSnapshot, 1)
+    now = dt.datetime.now(dt.timezone.utc)
+    if snap is None:
+        session.add(
+            CraftResolvedSnapshot(id=1, built_at=now, recipe_count=recipes_n, edge_count=edges_n)
+        )
+    else:
+        snap.built_at = now
+        snap.recipe_count = recipes_n
+        snap.edge_count = edges_n
 
 
 def build(session: Session, nesql_path: str) -> tuple[int, int]:
@@ -183,6 +204,7 @@ def build(session: Session, nesql_path: str) -> tuple[int, int]:
                 edges_n += 1
             recipes_n += 1
 
+        _touch_snapshot(session, recipes_n, edges_n)
         session.commit()
     finally:
         nesql_conn.close()

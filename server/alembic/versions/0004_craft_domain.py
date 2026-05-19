@@ -43,7 +43,7 @@ def upgrade() -> None:
         sa.Column("damage", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("nbt_hash", sa.String(64)),
         sa.Column("weight", sa.Integer(), nullable=False, server_default="1"),
-        sa.Column("preferred", sa.Boolean(), nullable=False, server_default="0"),
+        sa.Column("preferred", sa.Boolean(), nullable=False, server_default=sa.false()),
     )
     op.create_index("ix_craft_alias_members_alias_id", "craft_alias_members", ["alias_id"])
     op.create_index("ix_craft_alias_members_nesql_item_id", "craft_alias_members", ["nesql_item_id"])
@@ -73,7 +73,7 @@ def upgrade() -> None:
         sa.Column("alias_id", sa.Integer(), sa.ForeignKey("craft_aliases.id"), nullable=False),
         sa.Column("fluid_id", sa.Integer()),
         sa.Column("amount", sa.Integer(), nullable=False, server_default="1"),
-        sa.Column("required", sa.Boolean(), nullable=False, server_default="1"),
+        sa.Column("required", sa.Boolean(), nullable=False, server_default=sa.true()),
     )
     op.create_index("ix_craft_recipe_inputs_recipe_id", "craft_recipe_inputs", ["recipe_id"])
     op.create_index("ix_craft_recipe_inputs_alias_id", "craft_recipe_inputs", ["alias_id"])

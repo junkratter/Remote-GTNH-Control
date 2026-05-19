@@ -11,6 +11,7 @@
         <el-menu-item index="Map"><el-icon><MapLocation /></el-icon>{{ t('menu.map') }}</el-menu-item>
         <el-menu-item index="Quests"><el-icon><Collection /></el-icon>{{ t('menu.quests') }}</el-menu-item>
         <el-menu-item index="Wiki"><el-icon><Reading /></el-icon>{{ t('menu.wiki') }}</el-menu-item>
+        <el-menu-item index="Craft"><el-icon><Goods /></el-icon>{{ t('menu.craft') }}</el-menu-item>
         <el-menu-item index="Settings"><el-icon><Setting /></el-icon>{{ t('menu.settings') }}</el-menu-item>
         <el-menu-item index="Info"><el-icon><Warning /></el-icon>{{ t('menu.info') }}</el-menu-item>
     </el-menu>

@@ -14,6 +14,7 @@ import Autocraft from '../pages/Autocraft.vue';
 import MapPage from '../pages/Map.vue';
 import Quests from '../pages/Quests.vue';
 import Wiki from '../pages/Wiki.vue';
+import Craft from '../pages/Craft.vue';
 
 const routes = [
     { path: '/', name: 'Home', component: Index },
@@ -28,6 +29,7 @@ const routes = [
     { path: '/map', name: 'Map', component: MapPage },
     { path: '/quests', name: 'Quests', component: Quests },
     { path: '/wiki', name: 'Wiki', component: Wiki },
+    { path: '/craft', name: 'Craft', component: Craft },
     { path: '/settings', name: 'Settings', component: Settings },
     { path: '/info', name: 'Info', component: Info },
 ];

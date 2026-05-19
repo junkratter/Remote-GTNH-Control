@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 _ALLOWED: dict[str, frozenset[str]] = {
-    "planning": frozenset({"awaiting_choice", "ready", "failed", "cancelled"}),
-    "awaiting_choice": frozenset({"ready", "failed", "cancelled"}),
-    "ready": frozenset({"programmed", "failed", "cancelled"}),
-    "programmed": frozenset({"crafting", "done", "failed", "cancelled"}),
+    "planning": frozenset(
+        {"awaiting_choice", "blocked", "ready", "awaiting_pattern", "failed", "cancelled"}
+    ),
+    "awaiting_choice": frozenset(
+        {"blocked", "ready", "awaiting_pattern", "failed", "cancelled"}
+    ),
+    "blocked": frozenset({"ready", "awaiting_pattern", "failed", "cancelled"}),
+    "awaiting_pattern": frozenset({"ready", "programmed", "failed", "cancelled"}),
+    "ready": frozenset({"awaiting_pattern", "programmed", "failed", "cancelled"}),
+    "programmed": frozenset({"crafting", "done", "ready", "failed", "cancelled"}),
     "crafting": frozenset({"done", "failed", "cancelled"}),
     "done": frozenset(),
     "failed": frozenset(),

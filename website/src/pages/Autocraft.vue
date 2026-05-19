@@ -128,6 +128,9 @@
                         <el-form-item :label="t('autocraft.plan.client')">
                             <el-input v-model="craftPlan.form.client_id" clearable />
                         </el-form-item>
+                        <el-form-item :label="t('autocraft.plan.ae_stock_client')">
+                            <el-input v-model="craftPlan.form.ae_stock_client_id" clearable />
+                        </el-form-item>
                     </el-form>
                 </div>
                 <div class="page-autocraft__wiki-toolbar">
@@ -529,7 +532,7 @@ const craftPlan = reactive({
     loading: false,
     root_job_id: null,
     treeText: '',
-    form: { goal_alias_id: 1, amount: 1, client_id: '' },
+    form: { goal_alias_id: 1, amount: 1, client_id: '', ae_stock_client_id: '' },
 });
 
 async function submitCraftPlan() {
@@ -539,6 +542,7 @@ async function submitCraftPlan() {
             goal_alias_id: craftPlan.form.goal_alias_id,
             amount: craftPlan.form.amount,
             client_id: craftPlan.form.client_id || null,
+            ae_stock_client_id: craftPlan.form.ae_stock_client_id || null,
         });
         const d = r.data;
         craftPlan.root_job_id = d?.root_job_id ?? null;

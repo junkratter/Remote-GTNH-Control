@@ -1,4 +1,4 @@
-.PHONY: help install dev test backend frontend openapi kb-update lint build deploy down logs migrate
+.PHONY: help install dev test backend frontend openapi kb-update lint build deploy down logs migrate craft-graph-build craft-graph-docs
 
 SHELL := /bin/bash
 
@@ -12,6 +12,8 @@ help:
 	@echo "  openapi       — regenerate website/src/api/generated/schema.d.ts"
 	@echo "  kb-update     — re-fetch wiki/docs into kb/"
 	@echo "  migrate       — alembic upgrade head"
+	@echo "  craft-graph-build — rebuild craft_recipes_resolved (needs SYNC_DATABASE_URL + NESQL_SQLITE_PATH)"
+	@echo "  craft-graph-docs  — short pointer to kb runbook"
 	@echo "  build         — docker compose build"
 	@echo "  deploy        — git pull + docker compose up -d --build"
 	@echo "  down          — docker compose down"
@@ -49,7 +51,7 @@ frontend:
 	cd website && npm run dev
 
 openapi:
-	cd server && . .venv/bin/activate && SERVER_TOKEN=$${SERVER_TOKEN:-dev} python scripts/dump_openapi.py
+	cd server && SERVER_TOKEN=$${SERVER_TOKEN:-dev} .venv/bin/python scripts/dump_openapi.py
 	cd website && npm run openapi:generate
 
 kb-update:
@@ -57,6 +59,13 @@ kb-update:
 
 migrate:
 	cd server && . .venv/bin/activate && alembic upgrade head
+
+craft-graph-build:
+	@test -n "$$NESQL_SQLITE_PATH" || (echo "Set NESQL_SQLITE_PATH to nesql.sqlite"; exit 1)
+	cd server && . .venv/bin/activate && PYTHONPATH=. python -m app.modules.craft.build_resolved --nesql "$$NESQL_SQLITE_PATH"
+
+craft-graph-docs:
+	@echo "See kb/07-runbooks/craft-graph-build.md"
 
 lint:
 	cd website && npm run lint

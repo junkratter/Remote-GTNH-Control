@@ -18,11 +18,7 @@
                         placement="top"
                         :show-after="200"
                     >
-                        <div
-                            class="mc-slot"
-                            :class="{ 'mc-slot--clickable': cell?.item_id }"
-                            @click="onSlotClick(cell)"
-                        >
+                        <div :class="mcSlotDynClass(cell)" @click="onSlotClick(cell)">
                             <template v-if="cell">
                                 <img
                                     v-if="cell.kind === 'item' && cell.image"
@@ -50,11 +46,7 @@
                         placement="top"
                         :show-after="200"
                     >
-                        <div
-                            class="mc-slot"
-                            :class="{ 'mc-slot--clickable': cell?.item_id }"
-                            @click="onSlotClick(cell)"
-                        >
+                        <div :class="mcSlotDynClass(cell)" @click="onSlotClick(cell)">
                             <template v-if="cell">
                                 <img
                                     v-if="cell.kind === 'item' && cell.image"
@@ -88,9 +80,30 @@ const { t } = useI18n();
 
 const props = defineProps({
     recipe: { type: Object, required: true },
+    /** Keys ``"${item_id}_${damage}"`` → AE-backed quantity for craft overlays */
+    stockQtyByKey: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['select-item']);
+
+function stockBorderClass(cell) {
+    if (!cell?.item_id || !props.stockQtyByKey || !Object.keys(props.stockQtyByKey).length) {
+        return '';
+    }
+    const key = `${cell.item_id}_${cell.damage ?? 0}`;
+    const need = cell.amount ?? 1;
+    const have = Number(props.stockQtyByKey[key] ?? 0);
+    if (have >= need) return 'mc-slot--in-stock';
+    return 'mc-slot--missing';
+}
+
+function mcSlotDynClass(cell) {
+    const xs = ['mc-slot'];
+    if (cell?.item_id) xs.push('mc-slot--clickable');
+    const sb = stockBorderClass(cell);
+    if (sb) xs.push(sb);
+    return xs.join(' ');
+}
 
 const itemCache = ref(new Map());
 const inputCells = ref([]);
@@ -209,6 +222,7 @@ function mapSlot(s, isOutput) {
         return {
             kind: 'item',
             item_id: s.item_id,
+            damage: s.damage ?? it?.damage ?? 0,
             image: itemUtil.staticAsset('img/default.png'),
             title: `#${s.item_id}`,
             amount: s.amount ?? 1,
@@ -219,6 +233,7 @@ function mapSlot(s, isOutput) {
     return {
         kind: 'item',
         item_id: s.item_id,
+        damage: s.damage ?? it?.damage ?? 0,
         image: resolved?.image || itemUtil.staticAsset('img/default.png'),
         title: resolved?.title || it.localized_name || it.unlocal_name,
         amount: s.amount ?? 1,
@@ -255,6 +270,14 @@ async function hydrate() {
     inputCells.value = rawIn.map((s) => mapSlot(s, false));
     outputCells.value = rawOut.map((s) => mapSlot(s, true));
 }
+
+watch(
+    () => props.stockQtyByKey,
+    () => {
+        hydrate();
+    },
+    { deep: true },
+);
 
 watch(
     () => props.recipe,
@@ -335,6 +358,14 @@ watch(
 .mc-slot--clickable:hover {
     border-color: #4a8fd4;
     box-shadow: inset 1px 1px 0 #ffffff88, 0 0 6px rgba(74, 143, 212, 0.45);
+}
+.mc-slot--in-stock {
+    outline: 2px solid rgba(46, 160, 67, 0.85);
+    outline-offset: -1px;
+}
+.mc-slot--missing {
+    outline: 2px solid rgba(200, 60, 60, 0.75);
+    outline-offset: -1px;
 }
 .mc-slot__img {
     width: 36px;

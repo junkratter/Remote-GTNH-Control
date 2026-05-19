@@ -25,7 +25,10 @@ def make_engine(url: str | None = None) -> AsyncEngine:
     connect_args: dict[str, object] = {}
     if target_url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
-    return create_async_engine(target_url, echo=False, connect_args=connect_args)
+        return create_async_engine(target_url, echo=False, connect_args=connect_args)
+    if target_url.startswith("postgresql"):
+        return create_async_engine(target_url, echo=False, pool_pre_ping=True)
+    return create_async_engine(target_url, echo=False)
 
 
 engine: AsyncEngine = make_engine()

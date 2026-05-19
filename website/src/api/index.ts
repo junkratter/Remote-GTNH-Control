@@ -180,12 +180,47 @@ async function craftEnvelope<T = unknown>(
 }
 
 export const craftApi = {
-    createPlan: (body: { goal_alias_id: number; amount: number; client_id?: string | null }) =>
+    createPlan: (body: {
+        goal_alias_id: number;
+        amount: number;
+        client_id?: string | null;
+        ae_stock_client_id?: string | null;
+    }) =>
         craftEnvelope(`/api/craft/plan`, {
             method: "POST",
             body: JSON.stringify(body),
         }),
     getPlan: (rootJobId: number) => craftEnvelope(`/api/craft/plan/${rootJobId}`),
+    health: () => craftEnvelope(`/api/craft/health`),
+    resolveAlias: (nesql_item_id: number, damage = 0) =>
+        craftEnvelope(`/api/craft/item-alias?nesql_item_id=${nesql_item_id}&damage=${damage}`),
+    stock: (client_id: string, aliasesCsv: string) =>
+        craftEnvelope(
+            `/api/craft/me/stock?client_id=${encodeURIComponent(client_id)}&aliases=${encodeURIComponent(aliasesCsv)}`,
+        ),
+    choose: (rootJobId: number, body: { job_id: number; recipe_id: number }) =>
+        craftEnvelope(`/api/craft/plan/${rootJobId}/choose`, {
+            method: "POST",
+            body: JSON.stringify(body),
+        }),
+    start: (rootJobId: number, body: { client_id?: string | null }) =>
+        craftEnvelope(`/api/craft/plan/${rootJobId}/start`, {
+            method: "POST",
+            body: JSON.stringify(body),
+        }),
+    cancel: (rootJobId: number) =>
+        craftEnvelope(`/api/craft/plan/${rootJobId}/cancel`, {
+            method: "POST",
+            body: "{}",
+        }),
+    enqueuePatterns: (
+        rootJobId: number,
+        body: { client_id: string; patterns: Record<string, unknown>[] },
+    ) =>
+        craftEnvelope(`/api/craft/plan/${rootJobId}/enqueue_patterns`, {
+            method: "POST",
+            body: JSON.stringify(body),
+        }),
 };
 
 export const autocraftApi = {

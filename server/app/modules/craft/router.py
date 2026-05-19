@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,17 +10,22 @@ from app.core.auth import token_required
 from app.db.models import CraftAlias
 from app.db.session import get_session
 from app.modules.craft import service
-from app.modules.events.notify import notify
 from app.modules.craft.schemas import (
     CraftAliasOut,
     CraftChooseIn,
+    CraftEnqueuePatternsIn,
     CraftManualAliasIn,
     CraftPlanCreate,
     CraftPlanResponse,
+    CraftResolveAliasOut,
     CraftStartIn,
     CraftStartResponse,
+    CraftStartTaskOut,
     CraftTreeResponse,
 )
+from app.modules.craft.solver import ensure_singleton_alias
+from app.modules.events.notify import notify
+from app.modules.craft.stock_store import alias_quantities_available, inventory_updated_iso
 from app.schemas import StandardResponseModel
 
 router = APIRouter(prefix="/craft", tags=["craft"], dependencies=[Depends(token_required)])
@@ -28,6 +33,45 @@ router = APIRouter(prefix="/craft", tags=["craft"], dependencies=[Depends(token_
 
 def _ok(data: object) -> dict:
     return {"code": 200, "message": "success", "data": data}
+
+
+@router.get("/health", response_model=StandardResponseModel)
+async def craft_health(session: AsyncSession = Depends(get_session)) -> dict:
+    snap = await service.craft_health_snapshot(session)
+    return _ok(snap)
+
+
+@router.get("/me/stock", response_model=StandardResponseModel)
+async def craft_stock(
+    request: Request,
+    client_id: str = Query(..., min_length=1, max_length=64),
+    aliases: str = Query(..., description="Comma-separated craft alias ids"),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    cid = service.normalize_client_id(client_id)
+    if not cid:
+        raise HTTPException(status_code=400, detail="invalid client_id")
+    try:
+        ids = [int(x.strip()) for x in aliases.split(",") if x.strip()]
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="invalid aliases") from exc
+    if not ids:
+        raise HTTPException(status_code=400, detail="aliases required")
+
+    qty = await alias_quantities_available(request.app, session, cid, ids)
+    updated = await inventory_updated_iso(request.app, cid)
+    return _ok({"client_id": cid, "quantities": qty, "inventory_updated_at": updated})
+
+
+@router.get("/item-alias", response_model=StandardResponseModel)
+async def resolve_item_alias(
+    nesql_item_id: int = Query(..., ge=1),
+    damage: int = Query(0, ge=0),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    aid = await ensure_singleton_alias(session, nesql_item_id, damage)
+    await session.commit()
+    return _ok(CraftResolveAliasOut(alias_id=aid).model_dump())
 
 
 @router.post("/plan", response_model=StandardResponseModel)
@@ -42,6 +86,8 @@ async def create_plan(
             goal_alias_id=body.goal_alias_id,
             amount=body.amount,
             client_id=body.client_id,
+            app=request.app,
+            ae_stock_client_id=body.ae_stock_client_id,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -88,6 +134,7 @@ async def choose_alternative(
             root_job_id=root_job_id,
             job_id=body.job_id,
             recipe_resolved_id=body.recipe_id,
+            app=request.app,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -110,12 +157,43 @@ async def start_plan(
         out = await service.start_plan(session, root_job_id, body.client_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    tasks_raw = out.get("tasks") or []
+    tasks_out = [
+        CraftStartTaskOut(job_id=t["job_id"], task_id=t["task_id"], commands=t["commands"])
+        for t in tasks_raw
+        if isinstance(t, dict)
+    ]
+    payload = CraftStartResponse(
+        task_id=out["task_id"],
+        commands=list(out.get("commands") or []),
+        tasks=tasks_out,
+    ).model_dump()
+
     await notify(
         request.app,
         "craft",
         {"kind": "start", "root_job_id": root_job_id, "task_id": out.get("task_id")},
     )
-    return _ok(CraftStartResponse(**out).model_dump())
+    return _ok(payload)
+
+
+@router.post("/plan/{root_job_id}/enqueue_patterns", response_model=StandardResponseModel)
+async def enqueue_plan_patterns_route(
+    root_job_id: int,
+    body: CraftEnqueuePatternsIn,
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    try:
+        data = await service.enqueue_plan_patterns(
+            session,
+            root_job_id=root_job_id,
+            client_id=body.client_id,
+            patterns=list(body.patterns),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return _ok(data)
 
 
 @router.post("/plan/{root_job_id}/cancel", response_model=StandardResponseModel)
@@ -127,7 +205,6 @@ async def cancel_plan(
         await service.cancel_plan(session, root_job_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    await notify(request.app, "craft", {"kind": "cancel", "root_job_id": root_job_id})
     return _ok({"root_job_id": root_job_id})
 
 
@@ -140,9 +217,7 @@ async def list_aliases(
     rows = q.scalars().all()
     return _ok(
         [
-            CraftAliasOut(
-                id=r.id, key=r.key, source=r.source, priority=r.priority
-            ).model_dump()
+            CraftAliasOut(id=r.id, key=r.key, source=r.source, priority=r.priority).model_dump()
             for r in rows
         ]
     )
@@ -177,7 +252,6 @@ async def create_manual_alias(
     await session.commit()
     await session.refresh(alias)
     return _ok(
-        CraftAliasOut(
-            id=alias.id, key=alias.key, source=alias.source, priority=alias.priority
-        ).model_dump()
+        CraftAliasOut(id=alias.id, key=alias.key, source=alias.source, priority=alias.priority).model_dump()
     )
+

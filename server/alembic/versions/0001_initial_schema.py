@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("client_id", sa.String(length=64)),
         sa.Column("commands", sa.JSON(), nullable=False),
         sa.Column("status", sa.String(length=16), nullable=False),
-        sa.Column("chunked", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("chunked", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("results", sa.JSON()),
         sa.Column("created_time", sa.DateTime(timezone=True)),
         sa.Column("pending_time", sa.DateTime(timezone=True)),

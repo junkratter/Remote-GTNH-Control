@@ -270,6 +270,17 @@ class CraftRecipeOutput(Base):
     __table_args__ = (Index("ix_craft_recipe_outputs_alias", "alias_id"),)
 
 
+class CraftResolvedSnapshot(Base):
+    """Singleton row ``id=1``: last ``build_resolved`` stats for ``GET /api/craft/health``."""
+
+    __tablename__ = "craft_resolved_snapshot"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    built_at: Mapped[Optional[dt.datetime]] = mapped_column(DateTime(timezone=True))
+    recipe_count: Mapped[int] = mapped_column(Integer, default=0)
+    edge_count: Mapped[int] = mapped_column(Integer, default=0)
+
+
 class CraftPlan(Base):
     __tablename__ = "craft_plans"
 

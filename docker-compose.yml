@@ -12,7 +12,6 @@ services:
     restart: unless-stopped
 
   postgres:
-    profiles: ["postgres"]
     image: postgres:16-alpine
     container_name: remote-gtnh-control-postgres
     environment:
@@ -42,8 +41,8 @@ services:
       BACKEND_HOST: 0.0.0.0
       BACKEND_PORT: 1030
       BACKEND_WORKERS: ${BACKEND_WORKERS:-4}
-      DATABASE_URL: sqlite+aiosqlite:////app/data/remote-gtnh-control.sqlite
-      SYNC_DATABASE_URL: sqlite:////app/data/remote-gtnh-control.sqlite
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://gtnh:gtnh_dev_password_change_me@postgres:5432/remote_gtnh_control}
+      SYNC_DATABASE_URL: ${SYNC_DATABASE_URL:-postgresql+psycopg://gtnh:gtnh_dev_password_change_me@postgres:5432/remote_gtnh_control}
       NESQL_DATABASE_URL: sqlite:////app/data/nesql.sqlite
       OPTIONAL_REDIS_URL: ${OPTIONAL_REDIS_URL:-redis://redis:6379/0}
     ports:
@@ -52,7 +51,10 @@ services:
       - remote_gtnh_control_data:/app/data
     restart: unless-stopped
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://127.0.0.1:1030/api/info/version"]
       interval: 30s

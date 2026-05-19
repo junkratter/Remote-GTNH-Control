@@ -180,6 +180,18 @@ def _maybe_save_history(task_id: str, results: Any) -> None:
             logger.exception("history save failed for %s", task_id)
 
 
+async def _maybe_refresh_ae_stock_cache(
+    request: Request, task_id: str, x_client_id: str | None, final_results: Any
+) -> None:
+    if task_id not in ("getAllItems", "getAllSilempleItems") or not x_client_id:
+        return
+    flat = _dedupe_ae_items(_flatten_chunked_items(final_results))
+    rows = [r for r in flat if isinstance(r, dict)]
+    from app.modules.craft.stock_store import replace_ae_inventory_snapshot
+
+    await replace_ae_inventory_snapshot(request.app, x_client_id, rows)
+
+
 @router.post("/chunked_report", response_model=StandardResponseModel)
 async def receive_chunked_report(
     request: Request,
@@ -236,6 +248,7 @@ async def receive_chunked_report(
         await task_store.update(session, task_id, status=COMPLETED, results=final_results)
         await autocraft_service.sync_craft_request_after_report(session, task_id, final_results)
         await sync_craft_job_after_report(session, task_id, final_results, request.app)
+        await _maybe_refresh_ae_stock_cache(request, task_id, x_client_id, final_results)
         _maybe_save_history(task_id, final_results)
         return {
             "code": 200,
@@ -264,6 +277,7 @@ async def receive_report(
     await task_store.update(session, task_id, status=COMPLETED, results=final_results)
     await autocraft_service.sync_craft_request_after_report(session, task_id, final_results)
     await sync_craft_job_after_report(session, task_id, final_results, request.app)
+    await _maybe_refresh_ae_stock_cache(request, task_id, x_client_id, final_results)
     _maybe_save_history(task_id, final_results)
     return {"code": 200, "message": "Task result received", "data": {"taskId": task_id}}
 

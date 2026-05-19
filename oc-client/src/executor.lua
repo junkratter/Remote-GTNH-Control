@@ -148,10 +148,29 @@ function executor.fetchCommands()
         return nil, nil, nil
     end
 
-    local res = json.decode(response)
+    -- nginx/SPA often returns HTML; JSON decode then fails with "unexpected character '<'"
+    local trimmed = response:match("^%s*(.-)%s*$") or response
+    if trimmed:sub(1, 1) == "<" then
+        logger.error(
+            "Server returned HTML, not JSON. Check env.baseUrl: it must be the API root "
+                .. "(e.g. http://192.168.x.x:18856 or https://api.your-host), not the web UI page only. "
+                .. "GET was: "
+                .. tostring(serverUrl)
+        )
+        return nil, nil, nil
+    end
+
+    local ok, res = pcall(json.decode, response)
+    if not ok or type(res) ~= "table" then
+        logger.error(
+            "Invalid JSON from server (shows configure baseUrl/token). First 160 bytes: "
+                .. tostring(trimmed:sub(1, 160))
+        )
+        return nil, nil, nil
+    end
 
     if not res or res.code ~= 200 then
-        if res.message then
+        if res and res.message then
             logger.warn("Unable to fetching commands: " .. res.message)
         else
             logger.warn("Unable to fetching commands: unknown error")
